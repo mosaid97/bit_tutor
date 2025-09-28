@@ -1,0 +1,899 @@
+{
+  "student_alice": {
+    "student_id": "student_alice",
+    "profile_type": "advanced",
+    "created_at": "2025-09-20T00:09:34.621353",
+    "features": {
+      "student_id": "student_alice",
+      "skill_ids": [
+        "functions",
+        "graph_algorithms",
+        "dictionaries",
+        "lists",
+        "nosql",
+        "tuples",
+        "sql",
+        "arrays",
+        "operators",
+        "recursion",
+        "classification",
+        "searching",
+        "sets"
+      ],
+      "item_ids": [
+        "ex_database_sql_medium_3",
+        "ex_data_structures_tuples_hard_1",
+        "ex_data_structures_sets_easy_2",
+        "q_0_9314",
+        "q_2_8088",
+        "q_1_3927",
+        "ex_programming_basics_functions_medium_2",
+        "ex_database_nosql_easy_1",
+        "ex_programming_basics_functions_easy_1",
+        "ex_programming_basics_operators_medium_2",
+        "ex_data_structures_dictionaries_medium_1",
+        "ex_data_structures_arrays_easy_3",
+        "q_1_1747",
+        "ex_algorithms_searching_medium_1",
+        "ex_machine_learning_classification_easy_1",
+        "ex_data_structures_lists_medium_2",
+        "ex_algorithms_recursion_medium_2",
+        "q_2_6739",
+        "q_2_8715",
+        "ex_data_structures_lists_hard_1",
+        "q_1_6531",
+        "ex_algorithms_graph_algorithms_hard_3",
+        "ex_database_nosql_hard_3",
+        "ex_algorithms_recursion_hard_3",
+        "ex_programming_basics_operators_hard_1",
+        "ex_data_structures_tuples_hard_2",
+        "ex_machine_learning_classification_medium_3"
+      ],
+      "response_ids": [
+        "resp_student_alice_ex_algorithms_recursion_hard_3_20250904000021",
+        "resp_student_alice_ex_algorithms_searching_medium_1_20250919062134",
+        "resp_student_alice_ex_machine_learning_classification_medium_3_20250830210903",
+        "resp_student_alice_ex_programming_basics_functions_medium_2_20250910011143",
+        "resp_student_alice_ex_database_sql_medium_3_20250911032126",
+        "resp_student_alice_q_2_8088_20250902184508",
+        "resp_student_alice_q_2_8715_20250830071711",
+        "resp_student_alice_ex_data_structures_tuples_hard_2_20250905172142",
+        "resp_student_alice_ex_data_structures_sets_easy_2_20250908150900",
+        "resp_student_alice_ex_data_structures_tuples_hard_1_20250913001151",
+        "resp_student_alice_ex_database_nosql_easy_1_20250907120017",
+        "resp_student_alice_ex_programming_basics_operators_hard_1_20250831214247",
+        "resp_student_alice_q_1_1747_20250903144237",
+        "resp_student_alice_q_0_9314_20250906055234",
+        "resp_student_alice_ex_data_structures_lists_medium_2_20250905212150",
+        "resp_student_alice_q_2_6739_20250902092516",
+        "resp_student_alice_ex_data_structures_lists_hard_1_20250904104929",
+        "resp_student_alice_q_1_3927_20250904094613",
+        "resp_student_alice_ex_database_sql_medium_3_20250831203839",
+        "resp_student_alice_ex_data_structures_arrays_easy_3_20250903070652",
+        "resp_student_alice_ex_database_nosql_hard_3_20250916232734",
+        "resp_student_alice_q_2_8715_20250912114408",
+        "resp_student_alice_ex_programming_basics_operators_medium_2_20250905112858",
+        "resp_student_alice_ex_algorithms_graph_algorithms_hard_3_20250901144132",
+        "resp_student_alice_q_2_6739_20250914183734",
+        "resp_student_alice_q_1_6531_20250904213905",
+        "resp_student_alice_ex_algorithms_recursion_medium_2_20250902192100",
+        "resp_student_alice_ex_algorithms_graph_algorithms_hard_3_20250830030126",
+        "resp_student_alice_ex_database_nosql_easy_1_20250831131355",
+        "resp_student_alice_ex_programming_basics_functions_easy_1_20250903141945",
+        "resp_student_alice_ex_machine_learning_classification_easy_1_20250901203624",
+        "resp_student_alice_ex_data_structures_dictionaries_medium_1_20250830080218"
+      ]
+    },
+    "preferences": {
+      "learning_style": "kinesthetic",
+      "preferred_domains": [
+        "data_structures"
+      ],
+      "hobbies": [
+        "Reading",
+        "Sports"
+      ]
+    },
+    "performance_summary": {
+      "overall_mastery": 0.6737500000000001,
+      "submissions": 23,
+      "correct_submissions": 14,
+      "questions_asked": 9,
+      "domain_scores": {
+        "programming_basics": 0.1,
+        "data_structures": 0.1,
+        "algorithms": 0.1,
+        "web_development": 0.1,
+        "database": 0.1,
+        "machine_learning": 0.1
+      }
+    }
+  },
+  "student_bob": {
+    "student_id": "student_bob",
+    "profile_type": "intermediate",
+    "created_at": "2025-09-20T00:09:34.626563",
+    "features": {
+      "student_id": "student_bob",
+      "skill_ids": [
+        "regression",
+        "neural_networks",
+        "functions",
+        "normalization",
+        "lists",
+        "dynamic_programming",
+        "sql",
+        "operators",
+        "clustering",
+        "sorting",
+        "variables",
+        "evaluation"
+      ],
+      "item_ids": [
+        "ex_machine_learning_neural_networks_medium_3",
+        "ex_machine_learning_evaluation_hard_1",
+        "ex_programming_basics_variables_hard_2",
+        "ex_database_sql_easy_2",
+        "ex_programming_basics_functions_easy_3",
+        "ex_machine_learning_regression_medium_2",
+        "ex_machine_learning_clustering_medium_1",
+        "ex_algorithms_dynamic_programming_medium_1",
+        "ex_machine_learning_neural_networks_hard_3",
+        "q_1_4141",
+        "q_1_1747",
+        "q_0_2275",
+        "ex_algorithms_sorting_hard_2",
+        "q_2_2687",
+        "ex_database_normalization_medium_3",
+        "ex_programming_basics_operators_easy_3"
+      ],
+      "response_ids": [
+        "resp_student_bob_q_1_4141_20250825091434",
+        "resp_student_bob_ex_database_sql_easy_2_20250829210334",
+        "resp_student_bob_q_1_4141_20250821224434",
+        "resp_student_bob_ex_programming_basics_variables_hard_2_20250912122334",
+        "resp_student_bob_q_1_1747_20250907091334",
+        "resp_student_bob_ex_machine_learning_clustering_medium_1_20250911033934",
+        "resp_student_bob_ex_machine_learning_neural_networks_hard_3_20250915075934",
+        "resp_student_bob_ex_programming_basics_operators_easy_3_20250916175434",
+        "resp_student_bob_ex_programming_basics_functions_easy_3_20250914185234",
+        "resp_student_bob_ex_machine_learning_neural_networks_medium_3_20250831174634",
+        "resp_student_bob_q_0_2275_20250902115234",
+        "resp_student_bob_ex_algorithms_sorting_hard_2_20250903102434",
+        "resp_student_bob_ex_machine_learning_regression_medium_2_20250817165734",
+        "resp_student_bob_q_2_2687_20250905130534",
+        "resp_student_bob_ex_database_normalization_medium_3_20250909031234",
+        "resp_student_bob_ex_machine_learning_evaluation_hard_1_20250918102734",
+        "resp_student_bob_ex_algorithms_dynamic_programming_medium_1_20250917190534"
+      ]
+    },
+    "preferences": {
+      "learning_style": "reading",
+      "preferred_domains": [
+        "machine_learning"
+      ],
+      "hobbies": [
+        "Gaming",
+        "Chess",
+        "Reading"
+      ]
+    },
+    "performance_summary": {
+      "overall_mastery": 0.48125,
+      "submissions": 12,
+      "correct_submissions": 10,
+      "questions_asked": 5,
+      "domain_scores": {
+        "programming_basics": 0.1,
+        "data_structures": 0.1,
+        "algorithms": 0.1,
+        "web_development": 0.1,
+        "database": 0.1,
+        "machine_learning": 0.1
+      }
+    }
+  },
+  "student_charlie": {
+    "student_id": "student_charlie",
+    "profile_type": "beginner",
+    "created_at": "2025-09-20T00:09:34.632080",
+    "features": {
+      "student_id": "student_charlie",
+      "skill_ids": [
+        "functions",
+        "dictionaries",
+        "control_flow",
+        "data_types",
+        "searching"
+      ],
+      "item_ids": [
+        "q_0_3540",
+        "q_0_7614",
+        "ex_algorithms_searching_hard_3",
+        "q_1_6531",
+        "ex_data_structures_dictionaries_easy_1"
+      ],
+      "response_ids": [
+        "resp_student_charlie_ex_algorithms_searching_hard_3_20250910075234",
+        "resp_student_charlie_ex_data_structures_dictionaries_easy_1_20250826195334",
+        "resp_student_charlie_q_0_7614_20250907232734",
+        "resp_student_charlie_q_0_3540_20250919172634",
+        "resp_student_charlie_q_1_6531_20250806184134",
+        "resp_student_charlie_q_0_3540_20250916031234"
+      ]
+    },
+    "preferences": {
+      "learning_style": "reading",
+      "preferred_domains": [
+        "programming_basics"
+      ],
+      "hobbies": [
+        "Music",
+        "Sports",
+        "Gardening",
+        "Hiking"
+      ]
+    },
+    "performance_summary": {
+      "overall_mastery": 0.24125000000000002,
+      "submissions": 2,
+      "correct_submissions": 0,
+      "questions_asked": 4,
+      "domain_scores": {
+        "programming_basics": 0.1,
+        "data_structures": 0.1,
+        "algorithms": 0.1,
+        "web_development": 0.1,
+        "database": 0.1,
+        "machine_learning": 0.1
+      }
+    }
+  },
+  "student_dana": {
+    "student_id": "student_dana",
+    "profile_type": "beginner",
+    "created_at": "2025-09-20T00:09:34.636737",
+    "features": {
+      "student_id": "student_dana",
+      "skill_ids": [
+        "functions",
+        "lists",
+        "dictionaries",
+        "control_flow",
+        "nosql",
+        "operators",
+        "sorting",
+        "html"
+      ],
+      "item_ids": [
+        "q_0_3540",
+        "ex_web_development_html_hard_2",
+        "ex_algorithms_sorting_easy_1",
+        "ex_database_nosql_hard_1",
+        "q_0_9314",
+        "q_1_1747",
+        "q_0_2275",
+        "ex_database_nosql_hard_2",
+        "ex_algorithms_sorting_hard_3",
+        "ex_programming_basics_operators_easy_2",
+        "q_1_3927",
+        "q_0_9510"
+      ],
+      "response_ids": [
+        "resp_student_dana_q_1_3927_20250829061334",
+        "resp_student_dana_ex_algorithms_sorting_easy_1_20250829063834",
+        "resp_student_dana_q_1_1747_20250911104434",
+        "resp_student_dana_ex_database_nosql_hard_2_20250831205734",
+        "resp_student_dana_ex_database_nosql_hard_1_20250906130734",
+        "resp_student_dana_q_0_3540_20250829044634",
+        "resp_student_dana_q_0_9314_20250827212634",
+        "resp_student_dana_q_0_2275_20250815125634",
+        "resp_student_dana_q_0_3540_20250903194234",
+        "resp_student_dana_ex_algorithms_sorting_hard_3_20250917015534",
+        "resp_student_dana_ex_web_development_html_hard_2_20250914091434",
+        "resp_student_dana_ex_programming_basics_operators_easy_2_20250827113934",
+        "resp_student_dana_q_0_2275_20250919165734",
+        "resp_student_dana_q_0_9510_20250909120234"
+      ]
+    },
+    "preferences": {
+      "learning_style": "auditory",
+      "preferred_domains": [
+        "web_development",
+        "programming_basics"
+      ],
+      "hobbies": [
+        "Hiking",
+        "Sports",
+        "Painting",
+        "Robotics"
+      ]
+    },
+    "performance_summary": {
+      "overall_mastery": 0.24500000000000002,
+      "submissions": 6,
+      "correct_submissions": 1,
+      "questions_asked": 8,
+      "domain_scores": {
+        "programming_basics": 0.1,
+        "data_structures": 0.1,
+        "algorithms": 0.1,
+        "web_development": 0.1,
+        "database": 0.1,
+        "machine_learning": 0.1
+      }
+    }
+  },
+  "student_evan": {
+    "student_id": "student_evan",
+    "profile_type": "mixed",
+    "created_at": "2025-09-20T00:09:34.641288",
+    "features": {
+      "student_id": "student_evan",
+      "skill_ids": [
+        "dynamic_programming",
+        "lists",
+        "dictionaries",
+        "sql",
+        "classification",
+        "normalization",
+        "variables",
+        "dom",
+        "functions",
+        "indexing",
+        "nosql",
+        "transactions",
+        "clustering",
+        "css",
+        "evaluation",
+        "control_flow",
+        "data_types",
+        "arrays",
+        "recursion"
+      ],
+      "item_ids": [
+        "ex_database_normalization_hard_2",
+        "ex_database_indexing_easy_2",
+        "ex_machine_learning_clustering_easy_1",
+        "ex_database_transactions_medium_3",
+        "q_0_9314",
+        "q_2_8088",
+        "q_1_3927",
+        "ex_database_nosql_medium_1",
+        "ex_database_sql_easy_1",
+        "ex_data_structures_arrays_medium_1",
+        "ex_database_sql_hard_3",
+        "ex_machine_learning_evaluation_medium_2",
+        "q_2_2687",
+        "ex_web_development_css_easy_3",
+        "ex_machine_learning_evaluation_medium_3",
+        "q_0_9510",
+        "q_0_3540",
+        "ex_algorithms_recursion_medium_2",
+        "ex_web_development_dom_easy_1",
+        "q_2_6739",
+        "q_2_8715",
+        "ex_database_indexing_medium_1",
+        "q_1_6531",
+        "q_0_7614",
+        "ex_machine_learning_classification_hard_3",
+        "q_1_4141",
+        "ex_web_development_dom_easy_3",
+        "ex_programming_basics_data_types_medium_1",
+        "ex_database_normalization_medium_3"
+      ],
+      "response_ids": [
+        "resp_student_evan_q_1_3927_20250903073934",
+        "resp_student_evan_ex_database_indexing_medium_1_20250819045034",
+        "resp_student_evan_ex_machine_learning_evaluation_medium_2_20250730033230",
+        "resp_student_evan_q_1_6531_20250814145334",
+        "resp_student_evan_ex_machine_learning_evaluation_medium_3_20250830161634",
+        "resp_student_evan_q_2_8088_20250725112120",
+        "resp_student_evan_ex_machine_learning_classification_hard_3_20250809203111",
+        "resp_student_evan_ex_algorithms_recursion_medium_2_20250821134234",
+        "resp_student_evan_q_2_2687_20250823015534",
+        "resp_student_evan_q_2_8715_20250827124534",
+        "resp_student_evan_q_0_3540_20250803155339",
+        "resp_student_evan_q_0_9510_20250807230848",
+        "resp_student_evan_ex_database_normalization_medium_3_20250816163834",
+        "resp_student_evan_ex_database_normalization_hard_2_20250801220116",
+        "resp_student_evan_ex_web_development_dom_easy_3_20250811101934",
+        "resp_student_evan_ex_web_development_dom_easy_1_20250727001343",
+        "resp_student_evan_q_2_6739_20250806231825",
+        "resp_student_evan_ex_database_transactions_medium_3_20250826052834",
+        "resp_student_evan_ex_database_sql_hard_3_20250912212534",
+        "resp_student_evan_ex_web_development_css_easy_3_20250829153234",
+        "resp_student_evan_ex_database_normalization_medium_3_20250815150934",
+        "resp_student_evan_q_1_4141_20250825040534",
+        "resp_student_evan_q_0_9314_20250728103606",
+        "resp_student_evan_q_0_7614_20250731223253",
+        "resp_student_evan_ex_database_sql_easy_1_20250823214534",
+        "resp_student_evan_ex_database_nosql_medium_1_20250817110834",
+        "resp_student_evan_ex_data_structures_arrays_medium_1_20250819125834",
+        "resp_student_evan_q_2_8715_20250813153534",
+        "resp_student_evan_q_1_3927_20250812181734",
+        "resp_student_evan_q_0_9314_20250828110934",
+        "resp_student_evan_ex_machine_learning_clustering_easy_1_20250723220757",
+        "resp_student_evan_ex_database_indexing_easy_2_20250821034234",
+        "resp_student_evan_ex_programming_basics_data_types_medium_1_20250805123702"
+      ]
+    },
+    "preferences": {
+      "learning_style": "visual",
+      "preferred_domains": [
+        "algorithms"
+      ],
+      "hobbies": [
+        "Woodworking",
+        "Chess",
+        "Cooking",
+        "Movies"
+      ]
+    },
+    "performance_summary": {
+      "overall_mastery": 0.48125000000000007,
+      "submissions": 19,
+      "correct_submissions": 15,
+      "questions_asked": 14,
+      "domain_scores": {
+        "programming_basics": 0.1,
+        "data_structures": 0.1,
+        "algorithms": 0.1,
+        "web_development": 0.1,
+        "database": 0.1,
+        "machine_learning": 0.1
+      }
+    }
+  },
+  "student_1": {
+    "student_id": "student_1",
+    "profile_type": "beginner",
+    "created_at": "2025-09-20T00:09:34.645158",
+    "features": {
+      "student_id": "student_1",
+      "skill_ids": [
+        "functions",
+        "lists",
+        "control_flow",
+        "sql",
+        "clustering"
+      ],
+      "item_ids": [
+        "q_0_3540",
+        "ex_database_sql_easy_2",
+        "q_1_2875",
+        "ex_machine_learning_clustering_hard_2",
+        "q_0_9314",
+        "q_1_1747",
+        "q_0_2275"
+      ],
+      "response_ids": [
+        "resp_student_1_q_1_1747_20250910165834",
+        "resp_student_1_ex_machine_learning_clustering_hard_2_20250919231534",
+        "resp_student_1_q_0_9314_20250901221734",
+        "resp_student_1_q_0_9314_20250915032934",
+        "resp_student_1_q_1_2875_20250906011834",
+        "resp_student_1_q_0_2275_20250803184234",
+        "resp_student_1_ex_database_sql_easy_2_20250819225834",
+        "resp_student_1_q_0_3540_20250823233034",
+        "resp_student_1_q_0_3540_20250829005234"
+      ]
+    },
+    "preferences": {
+      "learning_style": "reading",
+      "preferred_domains": [
+        "database",
+        "algorithms"
+      ],
+      "hobbies": [
+        "Movies",
+        "Yoga"
+      ]
+    },
+    "performance_summary": {
+      "overall_mastery": 0.26875,
+      "submissions": 2,
+      "correct_submissions": 1,
+      "questions_asked": 7,
+      "domain_scores": {
+        "programming_basics": 0.1,
+        "data_structures": 0.1,
+        "algorithms": 0.1,
+        "web_development": 0.1,
+        "database": 0.1,
+        "machine_learning": 0.1
+      }
+    }
+  },
+  "student_2": {
+    "student_id": "student_2",
+    "profile_type": "beginner",
+    "created_at": "2025-09-20T00:09:34.648634",
+    "features": {
+      "student_id": "student_2",
+      "skill_ids": [
+        "javascript",
+        "dictionaries",
+        "control_flow",
+        "sorting",
+        "operators",
+        "clustering",
+        "css"
+      ],
+      "item_ids": [
+        "q_0_3540",
+        "ex_web_development_css_easy_2",
+        "ex_web_development_css_easy_1",
+        "ex_machine_learning_clustering_medium_2",
+        "ex_data_structures_dictionaries_hard_2",
+        "ex_algorithms_sorting_easy_2",
+        "ex_web_development_javascript_medium_1",
+        "ex_programming_basics_operators_medium_3"
+      ],
+      "response_ids": [
+        "resp_student_2_ex_data_structures_dictionaries_hard_2_20250829202334",
+        "resp_student_2_ex_algorithms_sorting_easy_2_20250915175134",
+        "resp_student_2_ex_programming_basics_operators_medium_3_20250912133534",
+        "resp_student_2_ex_web_development_css_easy_2_20250918201434",
+        "resp_student_2_ex_machine_learning_clustering_medium_2_20250817015834",
+        "resp_student_2_ex_web_development_css_easy_1_20250805052134",
+        "resp_student_2_q_0_3540_20250916065134",
+        "resp_student_2_ex_web_development_javascript_medium_1_20250910122534"
+      ]
+    },
+    "preferences": {
+      "learning_style": "kinesthetic",
+      "preferred_domains": [
+        "data_structures",
+        "programming_basics"
+      ],
+      "hobbies": [
+        "Gaming",
+        "Music",
+        "Writing"
+      ]
+    },
+    "performance_summary": {
+      "overall_mastery": 0.27125,
+      "submissions": 7,
+      "correct_submissions": 2,
+      "questions_asked": 1,
+      "domain_scores": {
+        "programming_basics": 0.1,
+        "data_structures": 0.1,
+        "algorithms": 0.1,
+        "web_development": 0.1,
+        "database": 0.1,
+        "machine_learning": 0.1
+      }
+    }
+  },
+  "student_3": {
+    "student_id": "student_3",
+    "profile_type": "advanced",
+    "created_at": "2025-09-20T00:09:34.652151",
+    "features": {
+      "student_id": "student_3",
+      "skill_ids": [
+        "dynamic_programming",
+        "html",
+        "javascript",
+        "regression",
+        "neural_networks",
+        "dictionaries",
+        "lists",
+        "classification",
+        "searching",
+        "variables",
+        "dom",
+        "functions",
+        "indexing",
+        "nosql",
+        "transactions",
+        "css",
+        "sets",
+        "control_flow",
+        "data_types",
+        "arrays",
+        "operators",
+        "recursion"
+      ],
+      "item_ids": [
+        "ex_algorithms_searching_easy_3",
+        "ex_programming_basics_functions_medium_3",
+        "ex_database_indexing_hard_3",
+        "ex_data_structures_sets_easy_1",
+        "ex_web_development_javascript_medium_2",
+        "ex_data_structures_lists_medium_3",
+        "ex_database_transactions_medium_3",
+        "ex_algorithms_recursion_hard_2",
+        "q_1_3927",
+        "ex_data_structures_arrays_easy_1",
+        "ex_database_nosql_medium_1",
+        "ex_web_development_dom_hard_3",
+        "q_1_1747",
+        "ex_machine_learning_neural_networks_medium_1",
+        "ex_machine_learning_regression_hard_2",
+        "ex_machine_learning_classification_hard_2",
+        "ex_data_structures_sets_medium_2",
+        "q_2_381",
+        "q_2_8715",
+        "ex_data_structures_arrays_hard_3",
+        "ex_programming_basics_data_types_hard_2",
+        "ex_programming_basics_operators_easy_1",
+        "ex_programming_basics_variables_easy_2",
+        "q_1_6531",
+        "ex_data_structures_dictionaries_hard_3",
+        "ex_data_structures_lists_hard_3",
+        "ex_web_development_html_easy_2",
+        "ex_algorithms_dynamic_programming_easy_3",
+        "ex_machine_learning_neural_networks_hard_3",
+        "ex_data_structures_lists_easy_2",
+        "ex_machine_learning_classification_hard_3",
+        "q_1_4141",
+        "ex_programming_basics_data_types_medium_2",
+        "ex_web_development_css_medium_1",
+        "ex_web_development_dom_easy_3",
+        "ex_web_development_html_medium_2",
+        "ex_programming_basics_operators_easy_3"
+      ],
+      "response_ids": [
+        "resp_student_3_ex_web_development_dom_easy_3_20250827184534",
+        "resp_student_3_ex_machine_learning_neural_networks_hard_3_20250727105959",
+        "resp_student_3_q_1_3927_20250723020048",
+        "resp_student_3_q_1_1747_20250724004902",
+        "resp_student_3_ex_web_development_css_medium_1_20250805051520",
+        "resp_student_3_ex_programming_basics_data_types_hard_2_20250816153838",
+        "resp_student_3_ex_machine_learning_classification_hard_2_20250726163745",
+        "resp_student_3_ex_data_structures_sets_easy_1_20250812125727",
+        "resp_student_3_ex_data_structures_lists_medium_3_20250819083820",
+        "resp_student_3_ex_machine_learning_classification_hard_3_20250911230734",
+        "resp_student_3_ex_web_development_javascript_medium_2_20250814022041",
+        "resp_student_3_ex_programming_basics_operators_easy_1_20250804062106",
+        "resp_student_3_ex_machine_learning_regression_hard_2_20250815193024",
+        "resp_student_3_ex_database_transactions_medium_3_20250725083917",
+        "resp_student_3_ex_web_development_dom_hard_3_20250904093534",
+        "resp_student_3_q_1_6531_20250807083802",
+        "resp_student_3_ex_database_nosql_medium_1_20250820141434",
+        "resp_student_3_ex_programming_basics_functions_medium_3_20250819003306",
+        "resp_student_3_ex_algorithms_dynamic_programming_easy_3_20250919015434",
+        "resp_student_3_ex_programming_basics_operators_easy_3_20250810233059",
+        "resp_student_3_ex_data_structures_lists_easy_2_20250806114548",
+        "resp_student_3_ex_data_structures_arrays_easy_1_20250729194541",
+        "resp_student_3_q_1_4141_20250803013438",
+        "resp_student_3_ex_data_structures_sets_medium_2_20250801080709",
+        "resp_student_3_ex_data_structures_arrays_hard_3_20250808073217",
+        "resp_student_3_ex_database_indexing_hard_3_20250803122852",
+        "resp_student_3_ex_data_structures_lists_hard_3_20250805224834",
+        "resp_student_3_q_2_8715_20250809000931",
+        "resp_student_3_ex_data_structures_dictionaries_hard_3_20250730215555",
+        "resp_student_3_ex_web_development_html_medium_2_20250812014313",
+        "resp_student_3_ex_algorithms_searching_easy_3_20250815132109",
+        "resp_student_3_ex_machine_learning_neural_networks_hard_3_20250725165331",
+        "resp_student_3_ex_algorithms_recursion_hard_2_20250729192027",
+        "resp_student_3_ex_web_development_html_easy_2_20250814073755",
+        "resp_student_3_q_2_381_20250728195813",
+        "resp_student_3_ex_machine_learning_neural_networks_medium_1_20250801231524",
+        "resp_student_3_ex_programming_basics_data_types_medium_2_20250809191045",
+        "resp_student_3_ex_programming_basics_variables_easy_2_20250818050952"
+      ]
+    },
+    "preferences": {
+      "learning_style": "kinesthetic",
+      "preferred_domains": [
+        "machine_learning",
+        "data_structures"
+      ],
+      "hobbies": [
+        "Cooking",
+        "Gaming",
+        "Gardening",
+        "Astronomy",
+        "Yoga"
+      ]
+    },
+    "performance_summary": {
+      "overall_mastery": 0.72875,
+      "submissions": 32,
+      "correct_submissions": 23,
+      "questions_asked": 6,
+      "domain_scores": {
+        "programming_basics": 0.1,
+        "data_structures": 0.1,
+        "algorithms": 0.1,
+        "web_development": 0.1,
+        "database": 0.1,
+        "machine_learning": 0.1
+      }
+    }
+  },
+  "student_4": {
+    "student_id": "student_4",
+    "profile_type": "mixed",
+    "created_at": "2025-09-20T00:09:34.656493",
+    "features": {
+      "student_id": "student_4",
+      "skill_ids": [
+        "dynamic_programming",
+        "dictionaries",
+        "lists",
+        "sql",
+        "classification",
+        "normalization",
+        "variables",
+        "functions",
+        "graph_algorithms",
+        "indexing",
+        "nosql",
+        "transactions",
+        "css",
+        "sets",
+        "control_flow",
+        "tuples",
+        "data_types",
+        "arrays",
+        "recursion",
+        "sorting"
+      ],
+      "item_ids": [
+        "ex_database_normalization_hard_2",
+        "ex_database_nosql_easy_2",
+        "ex_data_structures_lists_medium_3",
+        "q_0_9314",
+        "ex_programming_basics_control_flow_easy_2",
+        "ex_database_normalization_hard_1",
+        "q_1_3927",
+        "ex_machine_learning_classification_medium_1",
+        "ex_database_transactions_medium_1",
+        "q_1_1747",
+        "ex_data_structures_dictionaries_medium_2",
+        "q_0_9510",
+        "q_0_3540",
+        "ex_data_structures_sets_medium_2",
+        "q_2_381",
+        "q_2_6739",
+        "q_2_8715",
+        "ex_programming_basics_variables_medium_2",
+        "ex_data_structures_tuples_hard_3",
+        "ex_database_indexing_medium_2",
+        "ex_data_structures_arrays_medium_2",
+        "q_1_6531",
+        "ex_database_sql_medium_1",
+        "ex_algorithms_graph_algorithms_hard_3",
+        "ex_algorithms_dynamic_programming_easy_3",
+        "ex_web_development_css_medium_1",
+        "ex_algorithms_sorting_hard_2"
+      ],
+      "response_ids": [
+        "resp_student_4_q_2_381_20250827070616",
+        "resp_student_4_q_0_3540_20250827033253",
+        "resp_student_4_ex_database_indexing_medium_2_20250827135134",
+        "resp_student_4_q_0_3540_20250828211530",
+        "resp_student_4_ex_data_structures_dictionaries_medium_2_20250826083302",
+        "resp_student_4_ex_database_normalization_hard_2_20250828024753",
+        "resp_student_4_ex_programming_basics_control_flow_easy_2_20250829130257",
+        "resp_student_4_ex_web_development_css_medium_1_20250829021925",
+        "resp_student_4_ex_algorithms_dynamic_programming_easy_3_20250912154634",
+        "resp_student_4_ex_data_structures_lists_medium_3_20250828193216",
+        "resp_student_4_q_1_3927_20250827031657",
+        "resp_student_4_ex_programming_basics_variables_medium_2_20250828054420",
+        "resp_student_4_ex_database_sql_medium_1_20250828114043",
+        "resp_student_4_q_0_9510_20250917041334",
+        "resp_student_4_ex_database_nosql_easy_2_20250828085102",
+        "resp_student_4_ex_data_structures_sets_medium_2_20250827053039",
+        "resp_student_4_ex_algorithms_sorting_hard_2_20250827080006",
+        "resp_student_4_q_0_9314_20250827072630",
+        "resp_student_4_ex_machine_learning_classification_medium_1_20250919042834",
+        "resp_student_4_q_1_6531_20250829032434",
+        "resp_student_4_ex_data_structures_arrays_medium_2_20250828165606",
+        "resp_student_4_ex_database_normalization_hard_1_20250829022239",
+        "resp_student_4_q_2_6739_20250827055811",
+        "resp_student_4_q_1_1747_20250827021248",
+        "resp_student_4_ex_data_structures_tuples_hard_3_20250828081711",
+        "resp_student_4_q_2_8715_20250827142825",
+        "resp_student_4_q_1_1747_20250826200420",
+        "resp_student_4_ex_database_transactions_medium_1_20250828225148",
+        "resp_student_4_ex_database_indexing_medium_2_20250826093243",
+        "resp_student_4_ex_algorithms_graph_algorithms_hard_3_20250903190234"
+      ]
+    },
+    "preferences": {
+      "learning_style": "reading",
+      "preferred_domains": [
+        "web_development",
+        "programming_basics",
+        "data_structures"
+      ],
+      "hobbies": [
+        "Hiking",
+        "Swimming"
+      ]
+    },
+    "performance_summary": {
+      "overall_mastery": 0.4625,
+      "submissions": 19,
+      "correct_submissions": 11,
+      "questions_asked": 11,
+      "domain_scores": {
+        "programming_basics": 0.1,
+        "data_structures": 0.1,
+        "algorithms": 0.1,
+        "web_development": 0.1,
+        "database": 0.1,
+        "machine_learning": 0.1
+      }
+    }
+  },
+  "student_5": {
+    "student_id": "student_5",
+    "profile_type": "beginner",
+    "created_at": "2025-09-20T00:09:34.660241",
+    "features": {
+      "student_id": "student_5",
+      "skill_ids": [
+        "lists",
+        "dictionaries",
+        "transactions",
+        "data_types",
+        "sql",
+        "operators",
+        "variables"
+      ],
+      "item_ids": [
+        "ex_programming_basics_operators_medium_2",
+        "q_0_7614",
+        "q_1_2875",
+        "ex_database_sql_medium_3",
+        "ex_programming_basics_data_types_easy_2",
+        "q_1_4141",
+        "q_0_9314",
+        "ex_programming_basics_data_types_hard_1",
+        "q_1_6531",
+        "ex_database_sql_medium_1",
+        "q_1_3927",
+        "ex_database_transactions_hard_3"
+      ],
+      "response_ids": [
+        "resp_student_5_q_1_6531_20250901061534",
+        "resp_student_5_q_1_3927_20250909195434",
+        "resp_student_5_ex_programming_basics_data_types_hard_1_20250918143634",
+        "resp_student_5_q_0_9314_20250907061634",
+        "resp_student_5_ex_database_sql_medium_3_20250916010534",
+        "resp_student_5_ex_database_sql_medium_1_20250822024634",
+        "resp_student_5_ex_database_transactions_hard_3_20250917185334",
+        "resp_student_5_q_1_4141_20250823094134",
+        "resp_student_5_q_1_2875_20250915155734",
+        "resp_student_5_q_0_7614_20250829130234",
+        "resp_student_5_ex_programming_basics_data_types_easy_2_20250913002734",
+        "resp_student_5_q_1_6531_20250904044834",
+        "resp_student_5_q_0_7614_20250826091934",
+        "resp_student_5_ex_programming_basics_operators_medium_2_20250918084134"
+      ]
+    },
+    "preferences": {
+      "learning_style": "kinesthetic",
+      "preferred_domains": [
+        "web_development",
+        "programming_basics"
+      ],
+      "hobbies": [
+        "Movies",
+        "Astronomy"
+      ]
+    },
+    "performance_summary": {
+      "overall_mastery": 0.23125,
+      "submissions": 6,
+      "correct_submissions": 3,
+      "questions_asked": 8,
+      "domain_scores": {
+        "programming_basics": 0.1,
+        "data_structures": 0.1,
+        "algorithms": 0.1,
+        "web_development": 0.1,
+        "database": 0.1,
+        "machine_learning": 0.1
+      }
+    }
+  }
+}

@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>{% block title %}BIT Tutor{% endblock %}</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/agent_dashboard.css') }}">
+    
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <div class="container">
+        <header class="mb-4">
+            <h1 class="text-center dashboard-title">{% block header %}Student Learning Dashboard{% endblock %}</h1>
+        </header>
+        
+        {% block navigation %}
+        <nav class="navbar navbar-expand-lg navbar-light bg-light">
+            <div class="container-fluid">
+                <a class="navbar-brand" href="{{ url_for('home') }}">BIT Tutor</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav">
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('home') }}">Home</a>
+                        </li>
+                        {% if session.get('current_student') %}
+                        <li class="nav-item">
+                            <a class="nav-link {% if request.path.endswith('/skills') %}active{% endif %}" href="{{ url_for('dashboard', page='skills') }}">Skills & Diagnosis</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {% if request.path.endswith('/labs') %}active{% endif %}" href="{{ url_for('dashboard', page='labs') }}">Labs</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {% if request.path.endswith('/quiz') %}active{% endif %}" href="{{ url_for('dashboard', page='quiz') }}">Quiz</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {% if request.path.endswith('/knowledge_graph') %}active{% endif %}" href="{{ url_for('dashboard', page='knowledge_graph') }}">Knowledge Graph</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {% if request.path.endswith('/neo4j_database') %}active{% endif %}" href="{{ url_for('dashboard', page='neo4j_database') }}">Neo4j Database</a>
+                        </li>
+                        {% endif %}
+                    </ul>
+                </div>
+                {% if session.get('current_student') %}
+                <span class="navbar-text">
+                    Current Student: <strong>{{ session.get('current_student') }}</strong>
+                </span>
+                {% endif %}
+            </div>
+        </nav>
+        {% endblock %}
+        
+        <main class="my-4">
+            {% block content %}{% endblock %}
+        </main>
+        
+        <footer class="mt-5 py-3 text-center text-muted">
+            <div class="container">
+                <p>BIT Tutor &mdash; Personalized Learning Platform</p>
+            </div>
+        </footer>
+    </div>
+    
+    <!-- Bootstrap JavaScript -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Custom JavaScript -->
+    <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,2043 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ student.profile.name }} - BIT Tutor Dashboard</title>
+    
+    <!-- Modern CSS Framework -->
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/nexus.css') }}" rel="stylesheet">
+    
+    <!-- Chart.js for Advanced Visualizations -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+    
+    <style>
+        * { font-family: 'Inter', sans-serif; }
+        
+        .nexus-gradient {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+        }
+        
+        .glass-card {
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(30, 64, 175, 0.2);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+        
+        .metric-card {
+            background: linear-gradient(135deg, rgba(255,255,255,0.15), rgba(255,255,255,0.1));
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255,255,255,0.3);
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+        
+        .metric-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+        
+        .pulse-dot {
+            animation: pulse-dot 2s infinite;
+        }
+        
+        @keyframes pulse-dot {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.7; transform: scale(1.1); }
+        }
+        
+        .progress-ring {
+            transform: rotate(-90deg);
+        }
+        
+        .floating-widget {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+        
+        .ai-insight {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border-radius: 15px;
+            padding: 1rem;
+            margin: 0.5rem 0;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .ai-insight::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            animation: shimmer 3s infinite;
+        }
+        
+        @keyframes shimmer {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+        
+        .skill-bar {
+            height: 8px;
+            background: #e2e8f0;
+            border-radius: 4px;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .skill-progress {
+            height: 100%;
+            background: linear-gradient(90deg, #4facfe, #00f2fe);
+            border-radius: 4px;
+            transition: width 1s ease;
+        }
+        
+        .live-indicator {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            background: #10b981;
+            border-radius: 50%;
+            margin-right: 8px;
+            animation: pulse-dot 1.5s infinite;
+        }
+        
+        .recommendation-card {
+            background: linear-gradient(135deg, #ff9a9e, #fecfef);
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin: 1rem 0;
+            color: #2d3748;
+            transition: all 0.3s ease;
+        }
+        
+        .recommendation-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.1);
+        }
+
+        /* Chatbot Styling */
+        #chatbot-container {
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+        }
+
+        #chat-messages {
+            scrollbar-width: thin;
+            scrollbar-color: rgba(59, 130, 246, 0.3) transparent;
+        }
+
+        #chat-messages::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        #chat-messages::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        #chat-messages::-webkit-scrollbar-thumb {
+            background: rgba(59, 130, 246, 0.3);
+            border-radius: 2px;
+        }
+
+        .user-message {
+            animation: slideInRight 0.3s ease;
+        }
+
+        .bot-message {
+            animation: slideInLeft 0.3s ease;
+        }
+
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes slideInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .suggestion-btn {
+            transition: all 0.2s ease;
+        }
+
+        .suggestion-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        /* Chatbot Styling */
+        .chatbot-container {
+            max-height: 500px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chat-messages {
+            height: 350px;
+            overflow-y: auto;
+            padding: 1rem;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .bot-message, .user-message {
+            display: flex;
+            margin-bottom: 1rem;
+            animation: messageSlideIn 0.3s ease-out;
+        }
+
+        .user-message {
+            flex-direction: row-reverse;
+        }
+
+        .message-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            margin: 0 8px;
+            flex-shrink: 0;
+        }
+
+        .bot-message .message-avatar {
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            color: white;
+        }
+
+        .user-message .message-avatar {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+        }
+
+        .message-content {
+            max-width: 80%;
+            padding: 12px 16px;
+            border-radius: 18px;
+            position: relative;
+        }
+
+        .bot-message .message-content {
+            background: white;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .user-message .message-content {
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            color: white;
+        }
+
+        .message-content p {
+            margin: 0;
+            line-height: 1.5;
+        }
+
+        .quick-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .quick-action-btn {
+            background: linear-gradient(135deg, #f1f5f9, #e2e8f0);
+            border: 1px solid #cbd5e1;
+            color: #475569;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .quick-action-btn:hover {
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            color: white;
+            transform: translateY(-1px);
+        }
+
+        .chat-input-container input:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .typing-indicator {
+            display: flex;
+            align-items: center;
+            padding: 8px 16px;
+            background: #f1f5f9;
+            border-radius: 18px;
+            margin-bottom: 1rem;
+        }
+
+        .typing-dots {
+            display: flex;
+            gap: 4px;
+        }
+
+        .typing-dot {
+            width: 6px;
+            height: 6px;
+            background: #64748b;
+            border-radius: 50%;
+            animation: typingDot 1.4s infinite;
+        }
+
+        .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+        .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+        @keyframes messageSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes typingDot {
+            0%, 60%, 100% {
+                transform: translateY(0);
+                opacity: 0.4;
+            }
+            30% {
+                transform: translateY(-10px);
+                opacity: 1;
+            }
+        }
+
+        /* Chat popup responsive positioning */
+        @media (max-width: 640px) {
+            #chat-popup {
+                bottom: 1rem !important;
+                right: 1rem !important;
+                left: 1rem !important;
+            }
+            #chat-popup > div {
+                width: calc(100vw - 2rem) !important;
+                max-width: none !important;
+            }
+        }
+
+        /* Ensure chat popup doesn't exceed viewport */
+        #chat-popup > div {
+            max-height: 85vh;
+            min-height: 400px;
+        }
+
+        /* Add subtle animation for chat popup */
+        #chat-popup {
+            transition: all 0.3s ease-in-out;
+            transform-origin: bottom right;
+        }
+
+        #chat-popup.hidden {
+            transform: scale(0.95) translateY(20px);
+            opacity: 0;
+        }
+
+        #chat-popup:not(.hidden) {
+            transform: scale(1) translateY(0);
+            opacity: 1;
+        }
+
+        /* Tab Styles */
+        .tab-button {
+            color: #6b7280;
+            background-color: transparent;
+        }
+
+        .tab-button.active {
+            color: #1f2937;
+            background-color: white;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+        }
+
+        .tab-button:hover:not(.active) {
+            color: #374151;
+            background-color: #f9fafb;
+        }
+
+        .tab-content {
+            display: block;
+        }
+
+        .tab-content.hidden {
+            display: none;
+        }
+
+        /* Tab transition animations */
+        .tab-content {
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+<body class="nexus-gradient min-h-screen">
+    <!-- Navigation Header -->
+    <nav class="student-header border-b border-white border-opacity-20 p-4">
+        <div class="container mx-auto flex justify-between items-center">
+            <div class="flex items-center space-x-4">
+                <a href="/" class="text-white hover:text-blue-200 transition-colors">
+                    <i class="fas fa-arrow-left mr-2"></i>Back to Hub
+                </a>
+                <div class="text-white font-bold text-xl">BIT Tutor</div>
+            </div>
+
+            <div class="flex items-center space-x-6 text-white">
+                <div class="flex items-center">
+                    <span class="live-indicator"></span>
+                    <span class="text-sm font-medium">Live Session</span>
+                </div>
+                <div class="text-4xl">{{ student.profile.avatar }}</div>
+                <div>
+                    <div class="student-name">{{ student.profile.name }}</div>
+                    <div class="student-details text-sm">{{ student.profile.level }} • {{ student.profile.specialty }}</div>
+                    <div class="student-hobbies text-xs mt-1">
+                        {% for hobby in student.profile.hobbies[:2] %}
+                            <span class="hobby-tag mr-2 px-2 py-1 rounded-full">{{ hobby }}</span>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mx-auto px-6 py-8">
+        <!-- Live Metrics Row -->
+        <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4 mb-8">
+            <div class="metric-card rounded-xl p-4 text-center">
+                <div class="metric-value" id="session-time">--</div>
+                <div class="metric-label">Session Time</div>
+            </div>
+            <div class="metric-card rounded-xl p-4 text-center">
+                <div class="metric-value" id="concepts-today">--</div>
+                <div class="metric-label">Concepts Today</div>
+            </div>
+            <div class="metric-card rounded-xl p-4 text-center">
+                <div class="metric-value" id="accuracy-rate">--</div>
+                <div class="metric-label">Accuracy</div>
+            </div>
+            <div class="metric-card rounded-xl p-4 text-center">
+                <div class="metric-value" id="focus-score">--</div>
+                <div class="metric-label">Focus Score</div>
+            </div>
+            <div class="metric-card rounded-xl p-4 text-center">
+                <div class="metric-value" id="ai-confidence">--</div>
+                <div class="metric-label">AI Confidence</div>
+            </div>
+            <div class="metric-card rounded-xl p-4 text-center">
+                <div class="metric-value" id="milestone-progress">--</div>
+                <div class="metric-label">Next Milestone</div>
+            </div>
+        </div>
+
+        <!-- Navigation Tabs -->
+        <div class="glass-card rounded-2xl p-6 mb-8">
+            <div class="flex space-x-1 bg-gray-100 rounded-lg p-1">
+                <button id="tab-dashboard" class="tab-button active flex-1 py-3 px-4 rounded-md text-sm font-medium transition-all duration-200">
+                    <i class="fas fa-tachometer-alt mr-2"></i>Dashboard
+                </button>
+                <button id="tab-materials" class="tab-button flex-1 py-3 px-4 rounded-md text-sm font-medium transition-all duration-200">
+                    <i class="fas fa-book mr-2"></i>Learning Materials
+                </button>
+                <button id="tab-labs" class="tab-button flex-1 py-3 px-4 rounded-md text-sm font-medium transition-all duration-200">
+                    <i class="fas fa-flask mr-2"></i>Labs & Exercises
+                </button>
+                <button id="tab-quizzes" class="tab-button flex-1 py-3 px-4 rounded-md text-sm font-medium transition-all duration-200">
+                    <i class="fas fa-clipboard-check mr-2"></i>Quizzes & Tests
+                </button>
+            </div>
+        </div>
+
+        <!-- Tab Content Container -->
+        <div id="tab-content">
+            <!-- Dashboard Tab Content -->
+            <div id="content-dashboard" class="tab-content active">
+                <!-- Main Dashboard Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Left Column - Performance Analytics -->
+            <div class="lg:col-span-2 space-y-6">
+                <!-- Performance Trend Chart -->
+                <div class="glass-card rounded-2xl p-6">
+                    <h3 class="text-xl font-bold text-gray-800 mb-4">
+                        <i class="fas fa-chart-line mr-2 text-blue-500"></i>Performance Trend
+                    </h3>
+                    <canvas id="performanceChart" height="100"></canvas>
+                </div>
+
+                <!-- Skill Mastery Radar -->
+                <div class="glass-card rounded-2xl p-6">
+                    <h3 class="text-xl font-bold text-gray-800 mb-4">
+                        <i class="fas fa-spider mr-2 text-green-500"></i>Skill Mastery Matrix
+                    </h3>
+                    <canvas id="skillRadarChart" height="120"></canvas>
+                </div>
+
+                <!-- Learning Velocity -->
+                <div class="glass-card rounded-2xl p-6">
+                    <h3 class="text-xl font-bold text-gray-800 mb-4">
+                        <i class="fas fa-tachometer-alt mr-2 text-purple-500"></i>Learning Velocity
+                    </h3>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div class="text-center">
+                            <div class="text-2xl font-bold text-blue-600" id="concepts-per-week">--</div>
+                            <div class="text-sm text-gray-600">Concepts/Week</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-2xl font-bold text-green-600" id="practice-hours">--</div>
+                            <div class="text-sm text-gray-600">Practice Hours</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-2xl font-bold text-orange-600" id="completion-rate">--</div>
+                            <div class="text-sm text-gray-600">Completion Rate</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-2xl font-bold text-purple-600" id="retention-score">--</div>
+                            <div class="text-sm text-gray-600">Retention Score</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column - AI Insights & Recommendations -->
+            <div class="space-y-6">
+                <!-- AI Insights -->
+                <div class="glass-card rounded-2xl p-6">
+                    <h3 class="text-xl font-bold text-gray-800 mb-4">
+                        <i class="fas fa-brain mr-2 text-pink-500"></i>AI Insights
+                    </h3>
+                    <div id="ai-insights-container">
+                        <!-- AI insights will be loaded here -->
+                    </div>
+                </div>
+
+                <!-- Student Hobbies & Interests -->
+                <div class="glass-card rounded-2xl p-6">
+                    <h3 class="text-xl font-bold text-gray-800 mb-4">
+                        <i class="fas fa-heart mr-2 text-red-500"></i>Hobbies & Interests
+                    </h3>
+                    <div class="grid grid-cols-2 gap-2 mb-4">
+                        {% for hobby in student.profile.hobbies %}
+                        <div class="bg-blue-50 text-blue-800 px-3 py-2 rounded-lg text-sm font-medium text-center">
+                            {{ hobby }}
+                        </div>
+                        {% endfor %}
+                    </div>
+                    <div class="text-sm text-gray-600">
+                        <strong>Favorite Topics:</strong>
+                        <div class="mt-2">
+                            {% for topic in student.profile.favorite_topics %}
+                            <span class="bg-gray-100 text-gray-700 px-2 py-1 rounded-full text-xs mr-2 mb-1 inline-block">{{ topic }}</span>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Personalized Learning Labs -->
+                <div class="glass-card rounded-2xl p-6">
+                    <h3 class="text-xl font-bold text-gray-800 mb-4">
+                        <i class="fas fa-flask mr-2 text-green-500"></i>Personalized Labs
+                    </h3>
+                    <div id="personalized-labs-container">
+                        <!-- Personalized labs will be loaded here -->
+                    </div>
+                </div>
+
+                <!-- Smart Recommendations -->
+                <div class="glass-card rounded-2xl p-6">
+                    <h3 class="text-xl font-bold text-gray-800 mb-4">
+                        <i class="fas fa-magic mr-2 text-indigo-500"></i>Smart Recommendations
+                    </h3>
+                    <div id="recommendations-container">
+                        <!-- Recommendations will be loaded here -->
+                    </div>
+                </div>
+
+                <!-- Personalized Quizzes -->
+                <div class="glass-card rounded-2xl p-6">
+                    <h3 class="text-xl font-bold text-gray-800 mb-4">
+                        <i class="fas fa-question-circle mr-2 text-purple-500"></i>Hobby-Based Quizzes
+                    </h3>
+                    <div id="personalized-quizzes-container">
+                        <!-- Personalized quizzes will be loaded here -->
+                    </div>
+                </div>
+
+                <!-- AI Learning Assistant Preview -->
+                <div class="glass-card rounded-2xl p-6">
+                    <h3 class="text-xl font-bold text-gray-800 mb-4">
+                        <i class="fas fa-robot mr-2 text-blue-500"></i>Comprehensive AI Learning Assistant
+                    </h3>
+                    <div class="bg-gradient-to-br from-blue-50 to-indigo-100 rounded-xl p-6 text-center">
+                        <div class="w-16 h-16 bg-blue-500 rounded-full flex items-center justify-center text-white text-2xl mx-auto mb-4">
+                            🤖
+                        </div>
+                        <h4 class="text-lg font-semibold text-gray-800 mb-2">Your AI Learning Companion</h4>
+                        <p class="text-gray-600 mb-4">Get personalized help with knowledge graph insights, adaptive labs, and intelligent quizzes.</p>
+                        <div class="flex flex-wrap gap-2 justify-center mb-4">
+                            <span class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-xs">Knowledge Graph Aware</span>
+                            <span class="bg-green-100 text-green-800 px-3 py-1 rounded-full text-xs">Adaptive Learning</span>
+                            <span class="bg-purple-100 text-purple-800 px-3 py-1 rounded-full text-xs">Hobby Integration</span>
+                        </div>
+                        <button
+                            id="open-chat-btn"
+                            class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold transition-all transform hover:scale-105 shadow-lg"
+                        >
+                            <i class="fas fa-comments mr-2"></i>Start Conversation
+                        </button>
+                    </div>
+                </div>
+
+
+
+                <!-- Knowledge Graph Status -->
+                <div class="glass-card rounded-2xl p-6">
+                    <h3 class="text-xl font-bold text-gray-800 mb-4">
+                        <i class="fas fa-project-diagram mr-2 text-purple-500"></i>Knowledge Graph Updates
+                    </h3>
+                    <div id="knowledge-graph-status" class="space-y-4">
+                        <div class="bg-gradient-to-r from-purple-50 to-indigo-50 rounded-lg p-4">
+                            <div class="flex items-center justify-between mb-3">
+                                <span class="text-sm font-medium text-gray-700">Overall Progress</span>
+                                <span id="kg-mastery-percentage" class="text-lg font-bold text-purple-600">0%</span>
+                            </div>
+                            <div class="w-full bg-gray-200 rounded-full h-2">
+                                <div id="kg-progress-bar" class="bg-purple-500 h-2 rounded-full transition-all duration-500" style="width: 0%"></div>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-3">
+                            <div class="bg-blue-50 rounded-lg p-3 text-center">
+                                <div id="kg-total-concepts" class="text-2xl font-bold text-blue-600">0</div>
+                                <div class="text-xs text-gray-600">Total Concepts</div>
+                            </div>
+                            <div class="bg-green-50 rounded-lg p-3 text-center">
+                                <div id="kg-mastered-concepts" class="text-2xl font-bold text-green-600">0</div>
+                                <div class="text-xs text-gray-600">Mastered</div>
+                            </div>
+                        </div>
+
+                        <div class="bg-gray-50 rounded-lg p-3">
+                            <h4 class="text-sm font-semibold text-gray-700 mb-2">Recent Updates</h4>
+                            <div id="kg-recent-updates" class="space-y-2 max-h-32 overflow-y-auto">
+                                <div class="text-xs text-gray-500">Loading updates...</div>
+                            </div>
+                        </div>
+
+                        <button id="view-kg-btn" class="w-full bg-purple-500 hover:bg-purple-600 text-white py-2 px-4 rounded-lg text-sm font-medium transition-colors">
+                            <i class="fas fa-eye mr-2"></i>View Knowledge Graph
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Engagement Patterns -->
+                <div class="glass-card rounded-2xl p-6">
+                    <h3 class="text-xl font-bold text-gray-800 mb-4">
+                        <i class="fas fa-clock mr-2 text-yellow-500"></i>Engagement Patterns
+                    </h3>
+                    <canvas id="engagementChart" height="150"></canvas>
+                </div>
+            </div>
+        </div>
+            </div>
+
+            <!-- Learning Materials Tab Content -->
+            <div id="content-materials" class="tab-content hidden">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <!-- Knowledge Graph-Based Materials -->
+                    <div class="glass-card rounded-2xl p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-xl font-bold text-gray-800">
+                                <i class="fas fa-brain mr-2 text-blue-500"></i>Personalized Learning Materials
+                            </h3>
+                            <button id="load-materials-btn" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+                                <i class="fas fa-sync-alt mr-1"></i>Load Materials
+                            </button>
+                        </div>
+                        <div id="learning-materials-container" class="space-y-4">
+                            <div class="text-center py-8 text-gray-500">
+                                <i class="fas fa-book-open text-4xl mb-4 opacity-50"></i>
+                                <p>Click "Load Materials" to generate personalized learning content based on your knowledge graph</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Verified Sources & Progress -->
+                    <div class="glass-card rounded-2xl p-6">
+                        <h3 class="text-xl font-bold text-gray-800 mb-4">
+                            <i class="fas fa-shield-alt mr-2 text-green-500"></i>Verified Sources & Progress
+                        </h3>
+                        <div class="space-y-4">
+                            <div class="bg-green-50 rounded-lg p-4 border-l-4 border-green-500">
+                                <h4 class="font-semibold text-green-800 mb-2">📊 Materials Progress</h4>
+                                <div class="space-y-2">
+                                    <div class="flex justify-between text-sm">
+                                        <span>Materials Completed</span>
+                                        <span id="materials-completed">0/0</span>
+                                    </div>
+                                    <div class="w-full bg-gray-200 rounded-full h-2">
+                                        <div id="materials-progress-bar" class="bg-green-500 h-2 rounded-full" style="width: 0%"></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="bg-blue-50 rounded-lg p-4">
+                                <h4 class="font-semibold text-blue-800 mb-2">🔗 Source Categories</h4>
+                                <div class="grid grid-cols-2 gap-2 text-sm">
+                                    <div class="flex items-center">
+                                        <span class="w-3 h-3 bg-blue-500 rounded-full mr-2"></span>
+                                        <span>Academic Papers</span>
+                                    </div>
+                                    <div class="flex items-center">
+                                        <span class="w-3 h-3 bg-green-500 rounded-full mr-2"></span>
+                                        <span>Educational Courses</span>
+                                    </div>
+                                    <div class="flex items-center">
+                                        <span class="w-3 h-3 bg-purple-500 rounded-full mr-2"></span>
+                                        <span>Technical Docs</span>
+                                    </div>
+                                    <div class="flex items-center">
+                                        <span class="w-3 h-3 bg-orange-500 rounded-full mr-2"></span>
+                                        <span>Interactive Content</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="bg-yellow-50 rounded-lg p-4">
+                                <h4 class="font-semibold text-yellow-800 mb-2">🎯 Knowledge Graph Insights</h4>
+                                <div id="kg-insights" class="text-sm text-gray-700">
+                                    <p>Load materials to see personalized insights based on your knowledge graph</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Labs & Exercises Tab Content -->
+            <div id="content-labs" class="tab-content hidden">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <!-- Available Labs -->
+                    <div class="glass-card rounded-2xl p-6">
+                        <h3 class="text-xl font-bold text-gray-800 mb-4">
+                            <i class="fas fa-flask mr-2 text-orange-500"></i>Available Labs
+                        </h3>
+                        <div id="available-labs-container" class="space-y-4">
+                            <!-- Labs will be loaded dynamically -->
+                            <div class="text-center py-8">
+                                <div class="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center text-orange-500 text-2xl mx-auto mb-4">
+                                    <i class="fas fa-flask"></i>
+                                </div>
+                                <p class="text-gray-600 mb-4">Loading personalized labs...</p>
+                                <button id="load-labs-btn" class="bg-orange-500 hover:bg-orange-600 text-white px-6 py-2 rounded-lg font-medium transition-colors">
+                                    <i class="fas fa-sync-alt mr-2"></i>Load Labs
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Lab Progress -->
+                    <div class="glass-card rounded-2xl p-6">
+                        <h3 class="text-xl font-bold text-gray-800 mb-4">
+                            <i class="fas fa-chart-bar mr-2 text-green-500"></i>Lab Progress
+                        </h3>
+                        <div class="space-y-4">
+                            <div class="bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg p-4">
+                                <div class="flex items-center justify-between mb-2">
+                                    <span class="font-semibold text-green-800">Completed Labs</span>
+                                    <span class="text-2xl font-bold text-green-600">12</span>
+                                </div>
+                                <div class="w-full bg-green-200 rounded-full h-2">
+                                    <div class="bg-green-500 h-2 rounded-full" style="width: 75%"></div>
+                                </div>
+                            </div>
+
+                            <div class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-4">
+                                <div class="flex items-center justify-between mb-2">
+                                    <span class="font-semibold text-blue-800">In Progress</span>
+                                    <span class="text-2xl font-bold text-blue-600">3</span>
+                                </div>
+                                <div class="w-full bg-blue-200 rounded-full h-2">
+                                    <div class="bg-blue-500 h-2 rounded-full" style="width: 45%"></div>
+                                </div>
+                            </div>
+
+                            <div class="bg-gray-50 rounded-lg p-4">
+                                <h4 class="font-semibold text-gray-800 mb-3">Recent Lab Activity</h4>
+                                <div class="space-y-2 text-sm">
+                                    <div class="flex items-center justify-between">
+                                        <span class="text-gray-700">CNN Image Classification</span>
+                                        <span class="text-green-600 font-medium">Completed</span>
+                                    </div>
+                                    <div class="flex items-center justify-between">
+                                        <span class="text-gray-700">RNN Text Generation</span>
+                                        <span class="text-blue-600 font-medium">In Progress</span>
+                                    </div>
+                                    <div class="flex items-center justify-between">
+                                        <span class="text-gray-700">GAN Image Synthesis</span>
+                                        <span class="text-orange-600 font-medium">Started</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Lab Categories -->
+                <div class="mt-8">
+                    <div class="glass-card rounded-2xl p-6">
+                        <h3 class="text-xl font-bold text-gray-800 mb-4">
+                            <i class="fas fa-layer-group mr-2 text-purple-500"></i>Lab Categories
+                        </h3>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            <div class="bg-gradient-to-br from-blue-50 to-indigo-100 rounded-lg p-4 text-center">
+                                <div class="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center text-white text-xl mx-auto mb-3">
+                                    🧠
+                                </div>
+                                <h4 class="font-semibold text-blue-800 mb-2">Beginner Labs</h4>
+                                <p class="text-sm text-gray-700 mb-3">Foundational concepts and basic implementations</p>
+                                <span class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-xs">8 Available</span>
+                            </div>
+
+                            <div class="bg-gradient-to-br from-green-50 to-emerald-100 rounded-lg p-4 text-center">
+                                <div class="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center text-white text-xl mx-auto mb-3">
+                                    ⚡
+                                </div>
+                                <h4 class="font-semibold text-green-800 mb-2">Intermediate Labs</h4>
+                                <p class="text-sm text-gray-700 mb-3">Practical applications and real-world projects</p>
+                                <span class="bg-green-100 text-green-800 px-3 py-1 rounded-full text-xs">12 Available</span>
+                            </div>
+
+                            <div class="bg-gradient-to-br from-purple-50 to-violet-100 rounded-lg p-4 text-center">
+                                <div class="w-12 h-12 bg-purple-500 rounded-full flex items-center justify-center text-white text-xl mx-auto mb-3">
+                                    🚀
+                                </div>
+                                <h4 class="font-semibold text-purple-800 mb-2">Advanced Labs</h4>
+                                <p class="text-sm text-gray-700 mb-3">Complex projects and research implementations</p>
+                                <span class="bg-purple-100 text-purple-800 px-3 py-1 rounded-full text-xs">6 Available</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quizzes & Tests Tab Content -->
+            <div id="content-quizzes" class="tab-content hidden">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <!-- Available Quizzes -->
+                    <div class="glass-card rounded-2xl p-6">
+                        <h3 class="text-xl font-bold text-gray-800 mb-4">
+                            <i class="fas fa-clipboard-check mr-2 text-red-500"></i>Available Quizzes
+                        </h3>
+                        <div id="available-quizzes-container" class="space-y-4">
+                            <!-- Quizzes will be loaded dynamically -->
+                            <div class="text-center py-8">
+                                <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center text-red-500 text-2xl mx-auto mb-4">
+                                    <i class="fas fa-clipboard-check"></i>
+                                </div>
+                                <p class="text-gray-600 mb-4">Loading personalized quizzes...</p>
+                                <button id="load-quizzes-btn" class="bg-red-500 hover:bg-red-600 text-white px-6 py-2 rounded-lg font-medium transition-colors">
+                                    <i class="fas fa-sync-alt mr-2"></i>Load Quizzes
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quiz Performance -->
+                    <div class="glass-card rounded-2xl p-6">
+                        <h3 class="text-xl font-bold text-gray-800 mb-4">
+                            <i class="fas fa-chart-line mr-2 text-blue-500"></i>Quiz Performance
+                        </h3>
+                        <div class="space-y-4">
+                            <div class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-4">
+                                <div class="flex items-center justify-between mb-2">
+                                    <span class="font-semibold text-blue-800">Average Score</span>
+                                    <span class="text-2xl font-bold text-blue-600">87%</span>
+                                </div>
+                                <div class="w-full bg-blue-200 rounded-full h-2">
+                                    <div class="bg-blue-500 h-2 rounded-full" style="width: 87%"></div>
+                                </div>
+                            </div>
+
+                            <div class="bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg p-4">
+                                <div class="flex items-center justify-between mb-2">
+                                    <span class="font-semibold text-green-800">Quizzes Completed</span>
+                                    <span class="text-2xl font-bold text-green-600">24</span>
+                                </div>
+                                <div class="w-full bg-green-200 rounded-full h-2">
+                                    <div class="bg-green-500 h-2 rounded-full" style="width: 80%"></div>
+                                </div>
+                            </div>
+
+                            <div class="bg-gray-50 rounded-lg p-4">
+                                <h4 class="font-semibold text-gray-800 mb-3">Recent Quiz Results</h4>
+                                <div class="space-y-2 text-sm">
+                                    <div class="flex items-center justify-between">
+                                        <span class="text-gray-700">Neural Network Basics</span>
+                                        <span class="text-green-600 font-medium">92%</span>
+                                    </div>
+                                    <div class="flex items-center justify-between">
+                                        <span class="text-gray-700">CNN Architecture</span>
+                                        <span class="text-blue-600 font-medium">85%</span>
+                                    </div>
+                                    <div class="flex items-center justify-between">
+                                        <span class="text-gray-700">Backpropagation</span>
+                                        <span class="text-orange-600 font-medium">78%</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quiz Types -->
+                <div class="mt-8">
+                    <div class="glass-card rounded-2xl p-6">
+                        <h3 class="text-xl font-bold text-gray-800 mb-4">
+                            <i class="fas fa-list-alt mr-2 text-indigo-500"></i>Quiz Types
+                        </h3>
+                        <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                            <div class="bg-gradient-to-br from-red-50 to-pink-100 rounded-lg p-4 text-center">
+                                <div class="w-12 h-12 bg-red-500 rounded-full flex items-center justify-center text-white text-xl mx-auto mb-3">
+                                    🎯
+                                </div>
+                                <h4 class="font-semibold text-red-800 mb-2">Diagnostic</h4>
+                                <p class="text-sm text-gray-700 mb-3">Identify knowledge gaps</p>
+                                <span class="bg-red-100 text-red-800 px-3 py-1 rounded-full text-xs">5 Available</span>
+                            </div>
+
+                            <div class="bg-gradient-to-br from-blue-50 to-indigo-100 rounded-lg p-4 text-center">
+                                <div class="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center text-white text-xl mx-auto mb-3">
+                                    📝
+                                </div>
+                                <h4 class="font-semibold text-blue-800 mb-2">Practice</h4>
+                                <p class="text-sm text-gray-700 mb-3">Reinforce learning</p>
+                                <span class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-xs">15 Available</span>
+                            </div>
+
+                            <div class="bg-gradient-to-br from-purple-50 to-violet-100 rounded-lg p-4 text-center">
+                                <div class="w-12 h-12 bg-purple-500 rounded-full flex items-center justify-center text-white text-xl mx-auto mb-3">
+                                    🏆
+                                </div>
+                                <h4 class="font-semibold text-purple-800 mb-2">Challenge</h4>
+                                <p class="text-sm text-gray-700 mb-3">Test advanced skills</p>
+                                <span class="bg-purple-100 text-purple-800 px-3 py-1 rounded-full text-xs">8 Available</span>
+                            </div>
+
+                            <div class="bg-gradient-to-br from-green-50 to-emerald-100 rounded-lg p-4 text-center">
+                                <div class="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center text-white text-xl mx-auto mb-3">
+                                    🎮
+                                </div>
+                                <h4 class="font-semibold text-green-800 mb-2">Hobby-Based</h4>
+                                <p class="text-sm text-gray-700 mb-3">Connect interests to learning</p>
+                                <span class="bg-green-100 text-green-800 px-3 py-1 rounded-full text-xs">12 Available</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Floating Chat Button -->
+    <div id="chat-float-btn" class="fixed bottom-6 right-6 z-50">
+        <button class="bg-blue-500 hover:bg-blue-600 text-white w-16 h-16 rounded-full shadow-2xl transition-all transform hover:scale-110 flex items-center justify-center">
+            <i class="fas fa-robot text-xl"></i>
+        </button>
+    </div>
+
+    <!-- Chat Popup Modal -->
+    <div id="chat-popup" class="fixed bottom-4 right-4 z-50 hidden">
+        <!-- Chat Container -->
+        <div class="w-96 max-w-[calc(100vw-2rem)] max-h-[85vh] bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden sm:w-96 w-[calc(100vw-2rem)] border border-gray-200" style="height: min(600px, 85vh);">
+            <!-- Chat Header -->
+            <div id="chat-header" class="bg-gradient-to-r from-blue-500 to-indigo-600 text-white p-4 flex items-center justify-between flex-shrink-0 cursor-move">
+                <div class="flex items-center space-x-3 min-w-0">
+                    <div class="w-10 h-10 bg-white bg-opacity-20 rounded-full flex items-center justify-center flex-shrink-0">
+                        🤖
+                    </div>
+                    <div class="min-w-0">
+                        <h3 class="font-semibold truncate">BIT Tutor Assistant</h3>
+                        <p class="text-xs opacity-90 truncate">Knowledge Graph Enabled</p>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <button id="minimize-chat-btn" class="text-white hover:bg-white hover:bg-opacity-20 w-8 h-8 rounded-full flex items-center justify-center transition-colors flex-shrink-0">
+                        <i class="fas fa-minus text-sm"></i>
+                    </button>
+                    <button id="close-chat-btn" class="text-white hover:bg-white hover:bg-opacity-20 w-8 h-8 rounded-full flex items-center justify-center transition-colors flex-shrink-0">
+                        <i class="fas fa-times text-sm"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Chat Messages -->
+            <div id="popup-chat-messages" class="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50">
+                <div class="bot-message">
+                    <div class="flex items-start space-x-3">
+                        <div class="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white text-sm flex-shrink-0">
+                            🤖
+                        </div>
+                        <div class="bg-white rounded-lg p-3 shadow-sm max-w-xs">
+                            <p class="text-sm text-gray-800">Hello! I'm your comprehensive AI learning assistant with knowledge graph insights. How can I help you today?</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Suggestions -->
+            <div id="popup-chat-suggestions" class="px-4 py-2 bg-gray-50 border-t">
+                <div class="flex flex-wrap gap-2">
+                    <button class="suggestion-btn bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-xs hover:bg-blue-200 transition-colors">
+                        Show my progress
+                    </button>
+                    <button class="suggestion-btn bg-green-100 text-green-800 px-3 py-1 rounded-full text-xs hover:bg-green-200 transition-colors">
+                        Suggest labs
+                    </button>
+                    <button class="suggestion-btn bg-purple-100 text-purple-800 px-3 py-1 rounded-full text-xs hover:bg-purple-200 transition-colors">
+                        Create quiz
+                    </button>
+                </div>
+            </div>
+
+            <!-- Chat Input -->
+            <div class="p-4 bg-white border-t">
+                <div class="flex space-x-2">
+                    <input
+                        type="text"
+                        id="popup-chat-input"
+                        placeholder="Ask about your learning progress..."
+                        class="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                        maxlength="500"
+                    >
+                    <button
+                        id="popup-send-btn"
+                        class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors disabled:opacity-50"
+                    >
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </div>
+
+                <!-- Chat Controls -->
+                <div class="flex justify-between items-center mt-2 text-xs text-gray-500">
+                    <span id="popup-typing-indicator" class="hidden">
+                        <i class="fas fa-circle-notch fa-spin mr-1"></i>AI is thinking...
+                    </span>
+                    <button id="popup-clear-chat-btn" class="text-red-500 hover:text-red-700 transition-colors">
+                        <i class="fas fa-trash mr-1"></i>Clear Chat
+                    </button>
+                </div>
+            </div>
+
+            <!-- Resize Handle -->
+            <div id="chat-resize-handle" class="absolute bottom-0 right-0 w-4 h-4 cursor-se-resize">
+                <div class="absolute bottom-1 right-1 w-2 h-2 border-r-2 border-b-2 border-gray-400"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/nexus.js') }}"></script>
+    <script>
+        const studentId = '{{ student_id }}';
+        let charts = {};
+
+        // Initialize dashboard
+        document.addEventListener('DOMContentLoaded', function() {
+            loadStudentAnalytics();
+            startLiveMetricsUpdate();
+            initializeCharts();
+            loadPersonalizedContent();
+            loadKnowledgeGraphStatus();
+            initializePopupChatbot();
+            initializeTabs();
+            startStudentDashboard(studentId);
+        });
+
+        // Initialize tabs functionality
+        function initializeTabs() {
+            const tabButtons = document.querySelectorAll('.tab-button');
+            const tabContents = document.querySelectorAll('.tab-content');
+
+            tabButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const tabId = this.id.replace('tab-', '');
+
+                    // Remove active class from all buttons and contents
+                    tabButtons.forEach(btn => btn.classList.remove('active'));
+                    tabContents.forEach(content => content.classList.add('hidden'));
+
+                    // Add active class to clicked button and corresponding content
+                    this.classList.add('active');
+                    document.getElementById(`content-${tabId}`).classList.remove('hidden');
+
+                    // Load content based on tab
+                    loadTabContent(tabId);
+                });
+            });
+        }
+
+        // Load content for specific tab
+        function loadTabContent(tabId) {
+            switch(tabId) {
+                case 'materials':
+                    loadLearningMaterials();
+                    break;
+                case 'labs':
+                    loadLabsContent();
+                    break;
+                case 'quizzes':
+                    loadQuizzesContent();
+                    break;
+                case 'dashboard':
+                default:
+                    // Dashboard content is already loaded
+                    break;
+            }
+        }
+
+        // Load learning materials
+        function loadLearningMaterials() {
+            const loadMaterialsBtn = document.getElementById('load-materials-btn');
+            if (loadMaterialsBtn) {
+                loadMaterialsBtn.addEventListener('click', async function() {
+                    try {
+                        // Show loading state
+                        this.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i>Loading...';
+                        this.disabled = true;
+
+                        const response = await fetch(`/api/student/${studentId}/learning_materials`);
+                        const data = await response.json();
+
+                        const container = document.getElementById('learning-materials-container');
+                        const kgInsights = document.getElementById('kg-insights');
+
+                        if (data.materials && data.materials.length > 0) {
+                            // Display materials
+                            container.innerHTML = data.materials.map((material, index) => {
+                                const colors = [
+                                    'from-blue-50 to-indigo-50 border-blue-500 text-blue-800 bg-blue-100',
+                                    'from-green-50 to-emerald-50 border-green-500 text-green-800 bg-green-100',
+                                    'from-purple-50 to-violet-50 border-purple-500 text-purple-800 bg-purple-100',
+                                    'from-orange-50 to-amber-50 border-orange-500 text-orange-800 bg-orange-100',
+                                    'from-red-50 to-pink-50 border-red-500 text-red-800 bg-red-100'
+                                ];
+                                const colorSet = colors[index % colors.length];
+                                const [gradientColors, borderColor, textColor, badgeColor] = colorSet.split(' ');
+
+                                return `
+                                    <div class="bg-gradient-to-r ${gradientColors} rounded-lg p-4 border-l-4 ${borderColor}">
+                                        <div class="flex items-start justify-between mb-2">
+                                            <h4 class="font-semibold ${textColor} flex-1">${material.title}</h4>
+                                            <span class="${badgeColor} ${textColor} px-2 py-1 rounded text-xs ml-2">${material.difficulty_level}</span>
+                                        </div>
+                                        <p class="text-sm text-gray-700 mb-3">${material.description}</p>
+                                        <div class="space-y-2 mb-3">
+                                            <div class="flex items-center text-xs text-gray-600">
+                                                <i class="fas fa-clock mr-1"></i>
+                                                <span>${material.estimated_reading_time}</span>
+                                                <span class="mx-2">•</span>
+                                                <i class="fas fa-tag mr-1"></i>
+                                                <span>${material.content_type}</span>
+                                            </div>
+                                            ${material.key_concepts ? `
+                                                <div class="flex flex-wrap gap-1">
+                                                    ${material.key_concepts.slice(0, 3).map(concept =>
+                                                        `<span class="bg-gray-200 text-gray-700 px-2 py-1 rounded text-xs">${concept}</span>`
+                                                    ).join('')}
+                                                </div>
+                                            ` : ''}
+                                        </div>
+                                        <div class="flex items-center justify-between">
+                                            <div class="flex items-center space-x-2">
+                                                <button class="text-blue-600 hover:text-blue-800 text-sm font-medium" onclick="showMaterialDetails('${material.topic}')">
+                                                    <i class="fas fa-eye mr-1"></i>View Details
+                                                </button>
+                                                <button class="text-green-600 hover:text-green-800 text-sm font-medium" onclick="markAsRead('${material.topic}')">
+                                                    <i class="fas fa-check mr-1"></i>Mark as Read
+                                                </button>
+                                            </div>
+                                            <div class="text-xs text-gray-500">
+                                                <i class="fas fa-shield-alt mr-1"></i>Verified Sources
+                                            </div>
+                                        </div>
+                                    </div>
+                                `;
+                            }).join('');
+
+                            // Update insights
+                            if (data.knowledge_graph_enabled) {
+                                kgInsights.innerHTML = `
+                                    <div class="space-y-2">
+                                        <p><strong>📊 Generated:</strong> ${data.total_materials} personalized materials</p>
+                                        <p><strong>🧠 Knowledge Graph:</strong> Active and integrated</p>
+                                        <p><strong>🎯 Focus Areas:</strong> Based on your learning progress and weak areas</p>
+                                        <p><strong>🔗 Sources:</strong> Verified academic and educational content</p>
+                                    </div>
+                                `;
+                            }
+
+                            // Update progress
+                            updateMaterialsProgress(0, data.total_materials);
+                        } else {
+                            container.innerHTML = `
+                                <div class="text-center py-8 text-gray-500">
+                                    <i class="fas fa-exclamation-circle text-4xl mb-4 opacity-50"></i>
+                                    <p>No materials available at the moment. Please try again later.</p>
+                                </div>
+                            `;
+                        }
+
+                        // Reset button
+                        this.innerHTML = '<i class="fas fa-sync-alt mr-1"></i>Refresh Materials';
+                        this.disabled = false;
+
+                    } catch (error) {
+                        console.error('Error loading learning materials:', error);
+                        const container = document.getElementById('learning-materials-container');
+                        container.innerHTML = `
+                            <div class="text-center py-8 text-red-500">
+                                <i class="fas fa-exclamation-triangle text-4xl mb-4 opacity-50"></i>
+                                <p>Error loading materials. Please try again.</p>
+                            </div>
+                        `;
+
+                        // Reset button
+                        this.innerHTML = '<i class="fas fa-sync-alt mr-1"></i>Load Materials';
+                        this.disabled = false;
+                    }
+                });
+            }
+        }
+
+        // Helper functions for learning materials
+        function showMaterialDetails(topic) {
+            // Show detailed view of the material
+            alert(`Showing detailed view for: ${topic}\n\nThis would open a detailed view with:\n• Full content and sources\n• Interactive elements\n• Progress tracking\n• Related materials`);
+        }
+
+        function markAsRead(topic) {
+            // Mark material as read and update progress
+            const confirmed = confirm(`Mark "${topic}" as completed?`);
+            if (confirmed) {
+                // In a real implementation, this would update the backend
+                alert(`Great! "${topic}" marked as completed. Your progress has been updated.`);
+
+                // Update local progress (simplified)
+                const currentCompleted = parseInt(document.getElementById('materials-completed').textContent.split('/')[0]) || 0;
+                const total = parseInt(document.getElementById('materials-completed').textContent.split('/')[1]) || 1;
+                updateMaterialsProgress(currentCompleted + 1, total);
+            }
+        }
+
+        function updateMaterialsProgress(completed, total) {
+            const progressText = document.getElementById('materials-completed');
+            const progressBar = document.getElementById('materials-progress-bar');
+
+            if (progressText && progressBar) {
+                progressText.textContent = `${completed}/${total}`;
+                const percentage = total > 0 ? (completed / total) * 100 : 0;
+                progressBar.style.width = `${percentage}%`;
+            }
+        }
+
+        // Load labs content
+        function loadLabsContent() {
+            const loadLabsBtn = document.getElementById('load-labs-btn');
+            if (loadLabsBtn) {
+                loadLabsBtn.addEventListener('click', async function() {
+                    try {
+                        const response = await fetch(`/api/student/${studentId}/personalized_labs`);
+                        const data = await response.json();
+
+                        const container = document.getElementById('available-labs-container');
+                        if (data.labs && data.labs.length > 0) {
+                            container.innerHTML = data.labs.map(lab => `
+                                <div class="bg-gradient-to-r from-orange-50 to-amber-50 rounded-lg p-4 border-l-4 border-orange-500">
+                                    <h4 class="font-semibold text-orange-800 mb-2">${lab.title}</h4>
+                                    <p class="text-sm text-gray-700 mb-3">${lab.description}</p>
+                                    <div class="flex items-center justify-between">
+                                        <span class="bg-orange-100 text-orange-800 px-2 py-1 rounded text-xs">🎯 ${lab.hobby}</span>
+                                        <div class="flex items-center space-x-2">
+                                            <span class="text-xs text-gray-600">⏱️ ${lab.time}</span>
+                                            <button class="text-orange-600 hover:text-orange-800 text-sm font-medium">Start Lab</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            `).join('');
+                        }
+                    } catch (error) {
+                        console.error('Error loading labs:', error);
+                    }
+                });
+            }
+        }
+
+        // Load quizzes content
+        function loadQuizzesContent() {
+            const loadQuizzesBtn = document.getElementById('load-quizzes-btn');
+            if (loadQuizzesBtn) {
+                loadQuizzesBtn.addEventListener('click', async function() {
+                    try {
+                        const response = await fetch(`/api/student/${studentId}/personalized_quizzes`);
+                        const data = await response.json();
+
+                        const container = document.getElementById('available-quizzes-container');
+                        if (data.quizzes && data.quizzes.length > 0) {
+                            container.innerHTML = data.quizzes.map(quiz => `
+                                <div class="bg-gradient-to-r from-red-50 to-pink-50 rounded-lg p-4 border-l-4 border-red-500">
+                                    <h4 class="font-semibold text-red-800 mb-2">${quiz.title}</h4>
+                                    <p class="text-sm text-gray-700 mb-3">${quiz.description}</p>
+                                    <div class="flex items-center justify-between">
+                                        <span class="bg-red-100 text-red-800 px-2 py-1 rounded text-xs">${quiz.hobby}</span>
+                                        <div class="flex items-center space-x-2">
+                                            <span class="text-xs text-gray-600">📝 ${quiz.questions} questions</span>
+                                            <button class="text-red-600 hover:text-red-800 text-sm font-medium">Take Quiz</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            `).join('');
+                        }
+                    } catch (error) {
+                        console.error('Error loading quizzes:', error);
+                    }
+                });
+            }
+        }
+
+        // Load student analytics
+        async function loadStudentAnalytics() {
+            try {
+                const response = await fetch(`/api/student/${studentId}/analytics`);
+                const data = await response.json();
+                
+                updateAnalytics(data);
+            } catch (error) {
+                console.error('Error loading analytics:', error);
+            }
+        }
+
+        // Update analytics display
+        function updateAnalytics(data) {
+            // Update learning velocity
+            document.getElementById('concepts-per-week').textContent = data.learning_velocity.concepts_per_week.toFixed(1);
+            document.getElementById('practice-hours').textContent = data.learning_velocity.practice_hours.toFixed(1);
+            document.getElementById('completion-rate').textContent = data.learning_velocity.completion_rate.toFixed(1) + '%';
+            document.getElementById('retention-score').textContent = data.learning_velocity.retention_score.toFixed(1) + '%';
+
+            // Update AI insights
+            const insightsContainer = document.getElementById('ai-insights-container');
+            insightsContainer.innerHTML = data.ai_insights.map(insight => 
+                `<div class="ai-insight text-sm mb-2">${insight}</div>`
+            ).join('');
+
+            // Update recommendations
+            const recommendationsContainer = document.getElementById('recommendations-container');
+            recommendationsContainer.innerHTML = data.next_recommendations.map(rec => `
+                <div class="recommendation-card">
+                    <div class="font-semibold mb-2">${rec.title}</div>
+                    <div class="text-sm mb-2">${rec.description}</div>
+                    ${rec.hobby_connection ? `<div class="text-xs text-blue-600 mb-2">🎯 Based on your interest in ${rec.hobby_connection}</div>` : ''}
+                    ${rec.questions_count ? `<div class="text-xs text-purple-600 mb-2">📝 ${rec.questions_count} questions</div>` : ''}
+                    <div class="flex justify-between items-center text-xs">
+                        <span class="bg-white bg-opacity-30 px-2 py-1 rounded">${rec.difficulty}</span>
+                        <span class="font-semibold">+${rec.xp_reward} XP</span>
+                    </div>
+                </div>
+            `).join('');
+
+            // Update charts
+            updateCharts(data);
+        }
+
+        // Load personalized content
+        async function loadPersonalizedContent() {
+            try {
+                // Load personalized labs
+                const labsResponse = await fetch(`/api/student/${studentId}/personalized_labs`);
+                const labsData = await labsResponse.json();
+
+                const labsContainer = document.getElementById('personalized-labs-container');
+                labsContainer.innerHTML = labsData.labs.map(lab => `
+                    <div class="bg-gradient-to-r from-green-100 to-blue-100 rounded-lg p-4 mb-3 border-l-4 border-green-500">
+                        <div class="font-semibold text-green-800 mb-2">${lab.title}</div>
+                        <div class="text-sm text-gray-700 mb-2">${lab.description}</div>
+                        <div class="flex justify-between items-center text-xs">
+                            <span class="bg-green-200 text-green-800 px-2 py-1 rounded">🎯 ${lab.hobby}</span>
+                            <span class="text-gray-600">⏱️ ${lab.time}</span>
+                        </div>
+                    </div>
+                `).join('');
+
+                // Load personalized quizzes
+                const quizzesResponse = await fetch(`/api/student/${studentId}/personalized_quizzes`);
+                const quizzesData = await quizzesResponse.json();
+
+                const quizzesContainer = document.getElementById('personalized-quizzes-container');
+                quizzesContainer.innerHTML = quizzesData.quizzes.map(quiz => `
+                    <div class="bg-gradient-to-r from-purple-100 to-pink-100 rounded-lg p-4 mb-3 border-l-4 border-purple-500">
+                        <div class="font-semibold text-purple-800 mb-2">${quiz.title}</div>
+                        <div class="text-sm text-gray-700 mb-2">${quiz.description}</div>
+                        <div class="flex justify-between items-center text-xs">
+                            <span class="bg-purple-200 text-purple-800 px-2 py-1 rounded">${quiz.hobby}</span>
+                            <span class="text-gray-600">📝 ${quiz.questions} questions</span>
+                        </div>
+                    </div>
+                `).join('');
+
+            } catch (error) {
+                console.error('Error loading personalized content:', error);
+            }
+        }
+
+        // Popup Chatbot functionality
+        function initializePopupChatbot() {
+            const floatBtn = document.getElementById('chat-float-btn');
+            const openChatBtn = document.getElementById('open-chat-btn');
+            const chatPopup = document.getElementById('chat-popup');
+            const closeChatBtn = document.getElementById('close-chat-btn');
+            const minimizeBtn = document.getElementById('minimize-chat-btn');
+            const chatInput = document.getElementById('popup-chat-input');
+            const sendBtn = document.getElementById('popup-send-btn');
+            const clearBtn = document.getElementById('popup-clear-chat-btn');
+            const suggestionBtns = document.querySelectorAll('#popup-chat-suggestions .suggestion-btn');
+
+            // Open chat popup
+            function openChat() {
+                chatPopup.classList.remove('hidden');
+                floatBtn.classList.add('hidden');
+                chatInput.focus();
+                // Always load chat history when opening
+                loadChatHistory();
+            }
+
+            // Close chat popup
+            function closeChat() {
+                chatPopup.classList.add('hidden');
+                floatBtn.classList.remove('hidden');
+            }
+
+            // Minimize chat popup
+            function minimizeChat() {
+                chatPopup.classList.add('hidden');
+                floatBtn.classList.remove('hidden');
+            }
+
+            // Handle ESC key to close chat
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape' && !chatPopup.classList.contains('hidden')) {
+                    minimizeChat();
+                }
+            });
+
+            // Event listeners
+            floatBtn.addEventListener('click', openChat);
+            if (openChatBtn) openChatBtn.addEventListener('click', openChat);
+            closeChatBtn.addEventListener('click', closeChat);
+            minimizeBtn.addEventListener('click', minimizeChat);
+
+            // Send message on button click
+            sendBtn.addEventListener('click', sendPopupMessage);
+
+            // Send message on Enter key
+            chatInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    sendPopupMessage();
+                }
+            });
+
+            // Clear chat history
+            clearBtn.addEventListener('click', clearPopupChatHistory);
+
+            // Handle suggestion clicks
+            suggestionBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const suggestion = this.textContent.trim();
+                    chatInput.value = suggestion;
+                    sendPopupMessage();
+                });
+            });
+
+            // Make chat draggable and resizable
+            makeChatDraggable();
+            makeChatResizable();
+        }
+
+        // Make chat window draggable
+        function makeChatDraggable() {
+            const chatPopup = document.getElementById('chat-popup');
+            const chatHeader = document.getElementById('chat-header');
+            let isDragging = false;
+            let currentX;
+            let currentY;
+            let initialX;
+            let initialY;
+            let xOffset = 0;
+            let yOffset = 0;
+
+            chatHeader.addEventListener('mousedown', dragStart);
+            document.addEventListener('mousemove', drag);
+            document.addEventListener('mouseup', dragEnd);
+
+            function dragStart(e) {
+                initialX = e.clientX - xOffset;
+                initialY = e.clientY - yOffset;
+
+                if (e.target === chatHeader || chatHeader.contains(e.target)) {
+                    isDragging = true;
+                    chatPopup.style.transition = 'none';
+                }
+            }
+
+            function drag(e) {
+                if (isDragging) {
+                    e.preventDefault();
+                    currentX = e.clientX - initialX;
+                    currentY = e.clientY - initialY;
+
+                    xOffset = currentX;
+                    yOffset = currentY;
+
+                    // Constrain to viewport
+                    const rect = chatPopup.getBoundingClientRect();
+                    const maxX = window.innerWidth - rect.width;
+                    const maxY = window.innerHeight - rect.height;
+
+                    currentX = Math.max(0, Math.min(currentX, maxX));
+                    currentY = Math.max(0, Math.min(currentY, maxY));
+
+                    chatPopup.style.transform = `translate(${currentX}px, ${currentY}px)`;
+                    chatPopup.style.right = 'auto';
+                    chatPopup.style.bottom = 'auto';
+                    chatPopup.style.left = '0';
+                    chatPopup.style.top = '0';
+                }
+            }
+
+            function dragEnd() {
+                if (isDragging) {
+                    isDragging = false;
+                    chatPopup.style.transition = 'all 0.3s ease-in-out';
+                }
+            }
+        }
+
+        // Make chat window resizable
+        function makeChatResizable() {
+            const chatPopup = document.getElementById('chat-popup');
+            const resizeHandle = document.getElementById('chat-resize-handle');
+            let isResizing = false;
+
+            resizeHandle.addEventListener('mousedown', function(e) {
+                isResizing = true;
+                document.addEventListener('mousemove', resize);
+                document.addEventListener('mouseup', stopResize);
+                e.preventDefault();
+            });
+
+            function resize(e) {
+                if (!isResizing) return;
+
+                const rect = chatPopup.getBoundingClientRect();
+                const newWidth = Math.max(300, e.clientX - rect.left);
+                const newHeight = Math.max(400, e.clientY - rect.top);
+
+                // Constrain to viewport
+                const maxWidth = window.innerWidth - rect.left;
+                const maxHeight = window.innerHeight - rect.top;
+
+                const finalWidth = Math.min(newWidth, maxWidth);
+                const finalHeight = Math.min(newHeight, maxHeight);
+
+                chatPopup.style.width = finalWidth + 'px';
+                chatPopup.style.height = finalHeight + 'px';
+                chatPopup.style.maxWidth = 'none';
+                chatPopup.style.maxHeight = 'none';
+            }
+
+            function stopResize() {
+                isResizing = false;
+                document.removeEventListener('mousemove', resize);
+                document.removeEventListener('mouseup', stopResize);
+            }
+        }
+
+        async function sendPopupMessage() {
+            const chatInput = document.getElementById('popup-chat-input');
+            const message = chatInput.value.trim();
+
+            if (!message) return;
+
+            // Clear input and disable send button
+            chatInput.value = '';
+            const sendBtn = document.getElementById('popup-send-btn');
+            sendBtn.disabled = true;
+
+            // Add user message to chat
+            addPopupMessageToChat('user', message);
+
+            // Show typing indicator
+            showPopupTypingIndicator();
+
+            try {
+                const response = await fetch(`/api/student/${studentId}/chat`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ message: message })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    // Add AI response to chat
+                    addPopupMessageToChat('bot', data.response);
+
+                    // Update suggestions if provided
+                    if (data.suggestions) {
+                        updatePopupSuggestions(data.suggestions);
+                    }
+                } else {
+                    addPopupMessageToChat('bot', 'Sorry, I encountered an error. Please try again.');
+                }
+            } catch (error) {
+                console.error('Chat error:', error);
+                addPopupMessageToChat('bot', 'Sorry, I\'m having trouble connecting. Please try again.');
+            } finally {
+                // Hide typing indicator and re-enable send button
+                hidePopupTypingIndicator();
+                sendBtn.disabled = false;
+                chatInput.focus();
+            }
+        }
+
+        function addPopupMessageToChat(type, message) {
+            const chatMessages = document.getElementById('popup-chat-messages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `${type}-message mb-3`;
+
+            if (type === 'user') {
+                messageDiv.innerHTML = `
+                    <div class="flex items-start space-x-3 justify-end">
+                        <div class="bg-blue-500 text-white rounded-lg p-3 shadow-sm max-w-xs">
+                            <p class="text-sm">${escapeHtml(message)}</p>
+                        </div>
+                        <div class="w-8 h-8 bg-gray-400 rounded-full flex items-center justify-center text-white text-sm flex-shrink-0">
+                            👤
+                        </div>
+                    </div>
+                `;
+            } else {
+                messageDiv.innerHTML = `
+                    <div class="flex items-start space-x-3">
+                        <div class="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white text-sm flex-shrink-0">
+                            🤖
+                        </div>
+                        <div class="bg-white rounded-lg p-3 shadow-sm max-w-xs">
+                            <p class="text-sm text-gray-800">${formatBotMessage(message)}</p>
+                        </div>
+                    </div>
+                `;
+            }
+
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function formatBotMessage(message) {
+            // Convert newlines to <br> and preserve formatting
+            return escapeHtml(message)
+                .replace(/\n\n/g, '<br><br>')
+                .replace(/\n/g, '<br>')
+                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                .replace(/\*(.*?)\*/g, '<em>$1</em>');
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function showPopupTypingIndicator() {
+            const indicator = document.getElementById('popup-typing-indicator');
+            indicator.classList.remove('hidden');
+        }
+
+        function hidePopupTypingIndicator() {
+            const indicator = document.getElementById('popup-typing-indicator');
+            indicator.classList.add('hidden');
+        }
+
+        function updatePopupSuggestions(suggestions) {
+            const suggestionsContainer = document.getElementById('popup-chat-suggestions');
+            const buttonsContainer = suggestionsContainer.querySelector('.flex');
+
+            if (suggestions && suggestions.length > 0) {
+                buttonsContainer.innerHTML = suggestions.map(suggestion => `
+                    <button class="suggestion-btn bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-xs hover:bg-blue-200 transition-colors">
+                        ${escapeHtml(suggestion)}
+                    </button>
+                `).join('');
+
+                // Re-attach event listeners
+                buttonsContainer.querySelectorAll('.suggestion-btn').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const suggestion = this.textContent.trim();
+                        document.getElementById('popup-chat-input').value = suggestion;
+                        sendPopupMessage();
+                    });
+                });
+            }
+        }
+
+        async function loadChatHistory() {
+            try {
+                const response = await fetch(`/api/student/${studentId}/chat/history`);
+                const data = await response.json();
+                const chatMessages = document.getElementById('popup-chat-messages');
+
+                if (response.ok) {
+                    if (data.history.length > 0) {
+                        // Clear initial message and load history
+                        chatMessages.innerHTML = '';
+
+                        // Add history messages
+                        data.history.forEach(msg => {
+                            addPopupMessageToChat(msg.type, msg.message);
+                        });
+                    } else {
+                        // Only show initial message if no history exists
+                        chatMessages.innerHTML = `
+                            <div class="bot-message">
+                                <div class="flex items-start space-x-3">
+                                    <div class="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white text-sm flex-shrink-0">
+                                        🤖
+                                    </div>
+                                    <div class="bg-white rounded-lg p-3 shadow-sm max-w-xs">
+                                        <p class="text-sm text-gray-800">Hello! I'm your comprehensive AI learning assistant with knowledge graph insights. How can I help you today?</p>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading chat history:', error);
+            }
+        }
+
+        async function clearPopupChatHistory() {
+            if (!confirm('Are you sure you want to clear your chat history?')) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/student/${studentId}/chat/clear`, {
+                    method: 'POST'
+                });
+
+                if (response.ok) {
+                    const chatMessages = document.getElementById('popup-chat-messages');
+                    chatMessages.innerHTML = `
+                        <div class="bot-message">
+                            <div class="flex items-start space-x-3">
+                                <div class="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white text-sm flex-shrink-0">
+                                    🤖
+                                </div>
+                                <div class="bg-white rounded-lg p-3 shadow-sm max-w-xs">
+                                    <p class="text-sm text-gray-800">Hello! I'm your comprehensive AI learning assistant with knowledge graph insights. How can I help you today?</p>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('Error clearing chat history:', error);
+            }
+        }
+
+        // Load knowledge graph status
+        async function loadKnowledgeGraphStatus() {
+            try {
+                const response = await fetch(`/api/student/${studentId}/knowledge_graph/status`);
+                const data = await response.json();
+
+                if (response.ok) {
+                    // Update progress indicators
+                    const stats = data.knowledge_graph_stats || {};
+                    document.getElementById('kg-mastery-percentage').textContent = stats.mastery_percentage + '%';
+                    document.getElementById('kg-progress-bar').style.width = stats.mastery_percentage + '%';
+                    document.getElementById('kg-total-concepts').textContent = stats.total_concepts || 0;
+                    document.getElementById('kg-mastered-concepts').textContent = stats.mastered_concepts || 0;
+
+                    // Update recent updates
+                    const updatesContainer = document.getElementById('kg-recent-updates');
+                    if (data.recent_updates && data.recent_updates.length > 0) {
+                        updatesContainer.innerHTML = data.recent_updates.map(update => `
+                            <div class="flex justify-between items-center text-xs">
+                                <span class="text-gray-700">${update.concept}</span>
+                                <div class="flex items-center space-x-2">
+                                    <span class="text-red-500">${(update.old_mastery * 100).toFixed(0)}%</span>
+                                    <i class="fas fa-arrow-right text-gray-400"></i>
+                                    <span class="text-green-500">${(update.new_mastery * 100).toFixed(0)}%</span>
+                                </div>
+                            </div>
+                        `).join('');
+                    } else {
+                        updatesContainer.innerHTML = '<div class="text-xs text-gray-500">No recent updates</div>';
+                    }
+
+                    // Add view knowledge graph button functionality
+                    document.getElementById('view-kg-btn').addEventListener('click', showKnowledgeGraphModal);
+                }
+            } catch (error) {
+                console.error('Error loading knowledge graph status:', error);
+            }
+        }
+
+        // Show knowledge graph visualization modal
+        function showKnowledgeGraphModal() {
+            // Create modal for knowledge graph visualization
+            const modal = document.createElement('div');
+            modal.className = 'fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm';
+            modal.innerHTML = `
+                <div class="bg-white rounded-2xl shadow-2xl w-11/12 max-w-4xl h-5/6 flex flex-col">
+                    <div class="bg-gradient-to-r from-purple-500 to-indigo-600 text-white p-6 rounded-t-2xl">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <h2 class="text-2xl font-bold">Knowledge Graph Visualization</h2>
+                                <p class="text-purple-100">Real-time learning progress tracking</p>
+                            </div>
+                            <button id="close-kg-modal" class="text-white hover:bg-white hover:bg-opacity-20 w-10 h-10 rounded-full flex items-center justify-center transition-colors">
+                                <i class="fas fa-times text-xl"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="flex-1 p-6 overflow-hidden">
+                        <div id="kg-visualization" class="w-full h-full bg-gray-50 rounded-xl flex items-center justify-center">
+                            <div class="text-center">
+                                <div class="w-16 h-16 bg-purple-500 rounded-full flex items-center justify-center text-white text-2xl mx-auto mb-4">
+                                    <i class="fas fa-project-diagram"></i>
+                                </div>
+                                <h3 class="text-xl font-semibold text-gray-800 mb-2">Knowledge Graph Visualization</h3>
+                                <p class="text-gray-600 mb-4">Interactive visualization showing your learning progress and concept relationships.</p>
+                                <div class="grid grid-cols-2 gap-4 max-w-md mx-auto">
+                                    <div class="bg-blue-100 rounded-lg p-3">
+                                        <div class="text-2xl font-bold text-blue-600" id="modal-total-concepts">0</div>
+                                        <div class="text-sm text-gray-600">Total Concepts</div>
+                                    </div>
+                                    <div class="bg-green-100 rounded-lg p-3">
+                                        <div class="text-2xl font-bold text-green-600" id="modal-mastered-concepts">0</div>
+                                        <div class="text-sm text-gray-600">Mastered</div>
+                                    </div>
+                                </div>
+                                <div class="mt-4 text-sm text-gray-500">
+                                    <p><strong>How it updates:</strong></p>
+                                    <ul class="list-disc list-inside mt-2 space-y-1">
+                                        <li>Quiz completions adjust mastery levels</li>
+                                        <li>Lab exercises strengthen concept connections</li>
+                                        <li>AI chat interactions provide learning signals</li>
+                                        <li>Time spent on topics influences progress</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            document.body.appendChild(modal);
+
+            // Close modal functionality
+            document.getElementById('close-kg-modal').addEventListener('click', () => {
+                document.body.removeChild(modal);
+            });
+
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    document.body.removeChild(modal);
+                }
+            });
+
+            // Load and display knowledge graph data
+            loadKnowledgeGraphVisualization();
+        }
+
+        async function loadKnowledgeGraphVisualization() {
+            try {
+                const response = await fetch(`/api/student/${studentId}/knowledge_graph/visualization`);
+                const data = await response.json();
+
+                if (response.ok) {
+                    // Update modal stats
+                    const totalConcepts = data.nodes ? data.nodes.length : 0;
+                    const masteredConcepts = data.nodes ? data.nodes.filter(node => node.mastery >= 0.8).length : 0;
+
+                    document.getElementById('modal-total-concepts').textContent = totalConcepts;
+                    document.getElementById('modal-mastered-concepts').textContent = masteredConcepts;
+                }
+            } catch (error) {
+                console.error('Error loading knowledge graph visualization:', error);
+            }
+        }
+
+        // Start live metrics updates
+        function startLiveMetricsUpdate() {
+            updateLiveMetrics();
+            setInterval(updateLiveMetrics, 5000); // Update every 5 seconds
+        }
+
+        // Update live metrics
+        async function updateLiveMetrics() {
+            try {
+                const response = await fetch(`/api/student/${studentId}/live_metrics`);
+                const data = await response.json();
+                
+                document.getElementById('session-time').textContent = data.current_session_time + 'm';
+                document.getElementById('concepts-today').textContent = data.concepts_learned_today;
+                document.getElementById('accuracy-rate').textContent = data.accuracy_rate.toFixed(1) + '%';
+                document.getElementById('focus-score').textContent = data.focus_score.toFixed(0);
+                document.getElementById('ai-confidence').textContent = data.ai_confidence.toFixed(1) + '%';
+                document.getElementById('milestone-progress').textContent = data.next_milestone_progress.toFixed(0) + '%';
+            } catch (error) {
+                console.error('Error updating live metrics:', error);
+            }
+        }
+
+        // Initialize charts
+        function initializeCharts() {
+            // Performance trend chart will be initialized when data loads
+        }
+
+        // Update charts with data
+        function updateCharts(data) {
+            // Performance Trend Chart
+            const performanceCtx = document.getElementById('performanceChart').getContext('2d');
+            if (charts.performance) charts.performance.destroy();
+            
+            charts.performance = new Chart(performanceCtx, {
+                type: 'line',
+                data: {
+                    labels: data.performance_trend.dates,
+                    datasets: [{
+                        label: 'Performance Score',
+                        data: data.performance_trend.scores,
+                        borderColor: 'rgb(59, 130, 246)',
+                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                        borderWidth: 3,
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: { beginAtZero: true, max: 100 }
+                    }
+                }
+            });
+
+            // Skill Radar Chart
+            const skillCtx = document.getElementById('skillRadarChart').getContext('2d');
+            if (charts.skill) charts.skill.destroy();
+            
+            charts.skill = new Chart(skillCtx, {
+                type: 'radar',
+                data: {
+                    labels: Object.keys(data.skill_mastery),
+                    datasets: [{
+                        label: 'Skill Level',
+                        data: Object.values(data.skill_mastery),
+                        borderColor: 'rgb(34, 197, 94)',
+                        backgroundColor: 'rgba(34, 197, 94, 0.2)',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        r: { beginAtZero: true, max: 100 }
+                    }
+                }
+            });
+
+            // Engagement Pattern Chart
+            const engagementCtx = document.getElementById('engagementChart').getContext('2d');
+            if (charts.engagement) charts.engagement.destroy();
+            
+            charts.engagement = new Chart(engagementCtx, {
+                type: 'bar',
+                data: {
+                    labels: data.engagement_patterns.hours.map(h => h + ':00'),
+                    datasets: [{
+                        label: 'Activity Level',
+                        data: data.engagement_patterns.activity_levels,
+                        backgroundColor: 'rgba(168, 85, 247, 0.6)',
+                        borderColor: 'rgb(168, 85, 247)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: { beginAtZero: true, max: 1 }
+                    }
+                }
+            });
+        }
+    </script>
+</body>
+</html>

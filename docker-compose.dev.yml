@@ -1,0 +1,61 @@
+# BIT Tutor - Development Docker Compose Configuration
+version: '3.8'
+
+services:
+  bit-tutor-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: bit-tutor-dev
+    ports:
+      - "5000:5000"
+    environment:
+      - FLASK_ENV=development
+      - FLASK_DEBUG=1
+      - PYTHONPATH=/app
+      - PORT=5000
+    volumes:
+      # Mount source code for hot reloading
+      - .:/app
+      - /app/.venv
+      - /app/__pycache__
+    restart: unless-stopped
+    entrypoint: ["./docker-entrypoint-dev.sh"]
+    networks:
+      - bit-tutor-dev-network
+
+  # Development database (optional)
+  postgres-dev:
+    image: postgres:15-alpine
+    container_name: bit-tutor-dev-db
+    environment:
+      - POSTGRES_DB=bit_tutor_dev
+      - POSTGRES_USER=dev_user
+      - POSTGRES_PASSWORD=dev_password
+    ports:
+      - "5433:5432"
+    volumes:
+      - dev_postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+    networks:
+      - bit-tutor-dev-network
+
+  # Development Redis (optional)
+  redis-dev:
+    image: redis:7-alpine
+    container_name: bit-tutor-dev-redis
+    ports:
+      - "6380:6379"
+    volumes:
+      - dev_redis_data:/data
+    restart: unless-stopped
+    networks:
+      - bit-tutor-dev-network
+
+volumes:
+  dev_postgres_data:
+  dev_redis_data:
+
+networks:
+  bit-tutor-dev-network:
+    driver: bridge

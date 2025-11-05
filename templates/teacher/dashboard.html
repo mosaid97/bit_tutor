@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teacher Dashboard - BIT Tutor</title>
+    
+    <!-- Tailwind CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/nexus.css') }}" rel="stylesheet">
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="bg-gradient-to-br from-blue-900 via-purple-900 to-indigo-900 min-h-screen">
+    
+    <!-- Navigation -->
+    <nav class="glass-card mx-4 mt-4 mb-6 p-4">
+        <div class="flex justify-between items-center">
+            <div class="flex items-center space-x-4">
+                <div class="text-3xl">👨‍🏫</div>
+                <div>
+                    <h1 class="text-xl font-bold text-gray-800">Teacher Dashboard</h1>
+                    <p class="text-sm text-gray-600">Welcome, {{ teacher_name }}</p>
+                </div>
+            </div>
+            <div class="flex items-center space-x-4">
+                <a href="{{ url_for('teacher.knowledge_graph_curator') }}" 
+                   class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
+                    <i class="fas fa-project-diagram mr-2"></i>Knowledge Graph
+                </a>
+                <a href="{{ url_for('teacher.students_list') }}" 
+                   class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition">
+                    <i class="fas fa-users mr-2"></i>Students
+                </a>
+                <a href="{{ url_for('teacher.signout') }}" 
+                   class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition">
+                    <i class="fas fa-sign-out-alt mr-2"></i>Sign Out
+                </a>
+            </div>
+        </div>
+    </nav>
+    
+    <!-- Main Content -->
+    <div class="container mx-auto px-4 pb-8">
+        
+        <!-- Overview Stats -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            <!-- Total Students -->
+            <div class="glass-card p-6 text-center">
+                <div class="text-4xl mb-2">👥</div>
+                <div class="text-3xl font-bold text-blue-600">{{ dashboard_data.total_students }}</div>
+                <div class="text-gray-600 text-sm">Total Students</div>
+            </div>
+            
+            <!-- Average Performance -->
+            <div class="glass-card p-6 text-center">
+                <div class="text-4xl mb-2">📊</div>
+                <div class="text-3xl font-bold text-green-600" id="avg-performance">--</div>
+                <div class="text-gray-600 text-sm">Avg Performance</div>
+            </div>
+            
+            <!-- Active Assessments -->
+            <div class="glass-card p-6 text-center">
+                <div class="text-4xl mb-2">📝</div>
+                <div class="text-3xl font-bold text-purple-600" id="active-assessments">--</div>
+                <div class="text-gray-600 text-sm">Active Assessments</div>
+            </div>
+            
+            <!-- Struggling Students -->
+            <div class="glass-card p-6 text-center">
+                <div class="text-4xl mb-2">⚠️</div>
+                <div class="text-3xl font-bold text-red-600" id="struggling-students">--</div>
+                <div class="text-gray-600 text-sm">Need Attention</div>
+            </div>
+        </div>
+        
+        <!-- Students Performance Table -->
+        <div class="glass-card p-6 mb-8">
+            <h2 class="text-2xl font-bold text-gray-800 mb-4">
+                <i class="fas fa-chart-line mr-2"></i>Student Performance Overview
+            </h2>
+            
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead>
+                        <tr class="border-b-2 border-gray-300">
+                            <th class="text-left py-3 px-4">Student</th>
+                            <th class="text-center py-3 px-4">Assessments</th>
+                            <th class="text-center py-3 px-4">Avg Score</th>
+                            <th class="text-center py-3 px-4">Mastery Level</th>
+                            <th class="text-center py-3 px-4">Status</th>
+                            <th class="text-center py-3 px-4">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="students-table-body">
+                        {% if dashboard_data.students %}
+                            {% for student in dashboard_data.students %}
+                            <tr class="border-b border-gray-200 hover:bg-gray-50">
+                                <td class="py-3 px-4">
+                                    <div class="font-semibold">{{ student.name }}</div>
+                                    <div class="text-sm text-gray-500">{{ student.student_id }}</div>
+                                </td>
+                                <td class="text-center py-3 px-4">{{ student.total_assessments }}</td>
+                                <td class="text-center py-3 px-4">
+                                    <span class="font-semibold">{{ (student.average_score * 100)|round(1) }}%</span>
+                                </td>
+                                <td class="text-center py-3 px-4">
+                                    <div class="w-full bg-gray-200 rounded-full h-2">
+                                        <div class="bg-blue-600 h-2 rounded-full" 
+                                             style="width: {{ (student.mastery_level * 100)|round(1) }}%"></div>
+                                    </div>
+                                    <span class="text-xs text-gray-600">{{ (student.mastery_level * 100)|round(1) }}%</span>
+                                </td>
+                                <td class="text-center py-3 px-4">
+                                    {% if student.mastery_level >= 0.7 %}
+                                        <span class="px-3 py-1 bg-green-100 text-green-800 rounded-full text-xs">Excellent</span>
+                                    {% elif student.mastery_level >= 0.5 %}
+                                        <span class="px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-xs">Good</span>
+                                    {% else %}
+                                        <span class="px-3 py-1 bg-red-100 text-red-800 rounded-full text-xs">Needs Help</span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-center py-3 px-4">
+                                    <a href="{{ url_for('teacher.student_detail', student_id=student.student_id) }}" 
+                                       class="text-blue-600 hover:text-blue-800">
+                                        <i class="fas fa-eye"></i> View
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td colspan="6" class="text-center py-8 text-gray-500">
+                                    <i class="fas fa-users text-4xl mb-2"></i>
+                                    <p>No students enrolled yet</p>
+                                </td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <!-- Struggling Concepts -->
+        <div class="glass-card p-6">
+            <h2 class="text-2xl font-bold text-gray-800 mb-4">
+                <i class="fas fa-exclamation-triangle mr-2 text-red-600"></i>Concepts Students Struggle With
+            </h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {% if dashboard_data.struggling_concepts %}
+                    {% for concept, count in dashboard_data.struggling_concepts %}
+                    <div class="bg-red-50 border border-red-200 rounded-lg p-4">
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <div class="font-semibold text-red-800">{{ concept }}</div>
+                                <div class="text-sm text-red-600">{{ count }} student(s) struggling</div>
+                            </div>
+                            <div class="text-2xl text-red-600">
+                                <i class="fas fa-chart-line"></i>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="col-span-2 text-center py-8 text-gray-500">
+                        <i class="fas fa-check-circle text-4xl mb-2 text-green-500"></i>
+                        <p>No struggling concepts identified yet</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+        
+    </div>
+    
+    <script>
+        // Calculate and display aggregate stats
+        document.addEventListener('DOMContentLoaded', function() {
+            const students = {{ dashboard_data.students|tojson }};
+            
+            if (students && students.length > 0) {
+                // Calculate average performance
+                const avgPerf = students.reduce((sum, s) => sum + s.average_score, 0) / students.length;
+                document.getElementById('avg-performance').textContent = (avgPerf * 100).toFixed(1) + '%';
+                
+                // Count total assessments
+                const totalAssessments = students.reduce((sum, s) => sum + s.total_assessments, 0);
+                document.getElementById('active-assessments').textContent = totalAssessments;
+                
+                // Count struggling students (mastery < 0.5)
+                const struggling = students.filter(s => s.mastery_level < 0.5).length;
+                document.getElementById('struggling-students').textContent = struggling;
+            } else {
+                document.getElementById('avg-performance').textContent = '0%';
+                document.getElementById('active-assessments').textContent = '0';
+                document.getElementById('struggling-students').textContent = '0';
+            }
+        });
+    </script>
+    
+</body>
+</html>
+

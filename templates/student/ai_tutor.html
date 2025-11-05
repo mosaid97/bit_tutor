@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BIT Tutor AI - Your Personal Learning Assistant</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(30, 64, 175, 0.2);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+        .chat-message {
+            animation: slideIn 0.3s ease;
+        }
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .chat-container {
+            height: calc(100vh - 250px);
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-purple-50 via-pink-50 to-indigo-50 min-h-screen">
+    <!-- Header -->
+    <nav class="bg-white shadow-lg sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center">
+                    <i class="fas fa-robot text-purple-600 text-2xl mr-3"></i>
+                    <span class="text-xl font-bold text-gray-800">BIT Tutor AI</span>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <a href="/student/{{ student_id }}/browse-topics"
+                       class="px-4 py-2 text-gray-700 hover:text-purple-600 transition">
+                        <i class="fas fa-book mr-2"></i>Browse Topics
+                    </a>
+                    <a href="/student/{{ student_id }}/progress"
+                       class="px-4 py-2 text-gray-700 hover:text-purple-600 transition">
+                        <i class="fas fa-chart-line mr-2"></i>My Progress
+                    </a>
+                    <a href="/student/{{ student_id }}/dashboard"
+                       class="px-4 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-lg hover:shadow-lg transition">
+                        <i class="fas fa-home mr-2"></i>Dashboard
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Welcome Card -->
+        <div class="glass-card rounded-2xl p-8 mb-8 bg-gradient-to-r from-purple-50 to-pink-50 border-2 border-purple-200">
+            <div class="flex items-center mb-4">
+                <div class="w-16 h-16 bg-gradient-to-r from-purple-600 to-indigo-600 rounded-full flex items-center justify-center mr-4">
+                    <i class="fas fa-robot text-3xl text-white"></i>
+                </div>
+                <div>
+                    <h1 class="text-3xl font-bold text-gray-900">BIT Tutor AI</h1>
+                    <p class="text-gray-600">Your 24/7 Personal Learning Assistant</p>
+                </div>
+            </div>
+            <div class="grid grid-cols-3 gap-4 mt-6">
+                <div class="bg-white rounded-lg p-4 text-center">
+                    <i class="fas fa-question-circle text-3xl text-blue-600 mb-2"></i>
+                    <p class="text-sm text-gray-600">Ask Questions</p>
+                </div>
+                <div class="bg-white rounded-lg p-4 text-center">
+                    <i class="fas fa-lightbulb text-3xl text-yellow-600 mb-2"></i>
+                    <p class="text-sm text-gray-600">Get Explanations</p>
+                </div>
+                <div class="bg-white rounded-lg p-4 text-center">
+                    <i class="fas fa-graduation-cap text-3xl text-green-600 mb-2"></i>
+                    <p class="text-sm text-gray-600">Learn Better</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Chat Interface -->
+        <div class="glass-card rounded-2xl shadow-2xl overflow-hidden">
+            <!-- Chat Header -->
+            <div class="bg-gradient-to-r from-purple-600 to-indigo-600 text-white p-6">
+                <h2 class="text-xl font-bold">Chat with BIT Tutor AI</h2>
+                <p class="text-sm opacity-90">Ask me anything about your courses!</p>
+            </div>
+
+            <!-- Chat Messages -->
+            <div class="chat-container p-6 bg-gray-50" id="chat-messages">
+                <div class="chat-message mb-4">
+                    <div class="flex items-start">
+                        <div class="w-10 h-10 bg-purple-600 rounded-full flex items-center justify-center mr-3 flex-shrink-0">
+                            <i class="fas fa-robot text-white"></i>
+                        </div>
+                        <div class="bg-white rounded-lg p-4 shadow-sm max-w-2xl">
+                            <p class="text-sm text-gray-800">
+                                <strong>BIT Tutor AI:</strong> Hello! I'm your personal learning assistant. I can help you with:
+                            </p>
+                            <ul class="list-disc list-inside text-sm text-gray-700 mt-2 space-y-1">
+                                <li>Explaining concepts from your courses</li>
+                                <li>Answering questions about topics</li>
+                                <li>Providing study tips and recommendations</li>
+                                <li>Clarifying doubts about assignments and labs</li>
+                                <li>Suggesting learning resources</li>
+                            </ul>
+                            <p class="text-sm text-gray-800 mt-2">
+                                What would you like to learn about today?
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Chat Input -->
+            <div class="bg-white p-6 border-t border-gray-200">
+                <div class="flex gap-3">
+                    <input type="text" 
+                           id="chat-input" 
+                           placeholder="Type your question here..."
+                           class="flex-1 px-6 py-4 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-600 focus:border-transparent text-lg"
+                           onkeypress="if(event.key==='Enter') sendMessage()">
+                    <button onclick="sendMessage()" 
+                            class="px-8 py-4 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl hover:shadow-xl transition transform hover:scale-105 font-semibold">
+                        <i class="fas fa-paper-plane mr-2"></i>Send
+                    </button>
+                </div>
+                <div class="mt-4 flex flex-wrap gap-2">
+                    <button onclick="quickQuestion('What is NoSQL?')" 
+                            class="px-4 py-2 bg-purple-100 text-purple-700 rounded-lg hover:bg-purple-200 transition text-sm">
+                        What is NoSQL?
+                    </button>
+                    <button onclick="quickQuestion('Explain CAP theorem')" 
+                            class="px-4 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition text-sm">
+                        Explain CAP theorem
+                    </button>
+                    <button onclick="quickQuestion('How do I prepare for the quiz?')" 
+                            class="px-4 py-2 bg-green-100 text-green-700 rounded-lg hover:bg-green-200 transition text-sm">
+                        Quiz preparation tips
+                    </button>
+                    <button onclick="quickQuestion('What should I study next?')" 
+                            class="px-4 py-2 bg-orange-100 text-orange-700 rounded-lg hover:bg-orange-200 transition text-sm">
+                        What to study next?
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Features -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
+            <div class="glass-card rounded-xl p-6 text-center">
+                <i class="fas fa-brain text-4xl text-purple-600 mb-3"></i>
+                <h3 class="font-bold text-gray-900 mb-2">Smart AI</h3>
+                <p class="text-sm text-gray-600">Powered by advanced AI to understand your questions and provide accurate answers</p>
+            </div>
+            <div class="glass-card rounded-xl p-6 text-center">
+                <i class="fas fa-clock text-4xl text-blue-600 mb-3"></i>
+                <h3 class="font-bold text-gray-900 mb-2">24/7 Available</h3>
+                <p class="text-sm text-gray-600">Get help anytime, anywhere - I'm always here when you need me</p>
+            </div>
+            <div class="glass-card rounded-xl p-6 text-center">
+                <i class="fas fa-user-graduate text-4xl text-green-600 mb-3"></i>
+                <h3 class="font-bold text-gray-900 mb-2">Personalized</h3>
+                <p class="text-sm text-gray-600">Tailored responses based on your learning progress and needs</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const studentId = '{{ student_id }}';
+
+        // Send message to chatbot
+        async function sendMessage() {
+            const input = document.getElementById('chat-input');
+            const message = input.value.trim();
+            
+            if (!message) return;
+
+            // Add user message
+            addMessage(message, 'user');
+            input.value = '';
+
+            // Show typing indicator
+            showTypingIndicator();
+
+            // Send to backend
+            try {
+                const response = await fetch(`/student/${studentId}/learn/api/chat`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        message: message,
+                        topic: '',
+                        context: 'ai_tutor'
+                    })
+                });
+
+                const data = await response.json();
+                
+                // Remove typing indicator
+                removeTypingIndicator();
+                
+                // Add bot response
+                addMessage(data.response || 'Sorry, I could not process that.', 'bot');
+            } catch (error) {
+                console.error('Error:', error);
+                removeTypingIndicator();
+                addMessage('Sorry, I encountered an error. Please try again.', 'bot');
+            }
+        }
+
+        // Quick question
+        function quickQuestion(question) {
+            document.getElementById('chat-input').value = question;
+            sendMessage();
+        }
+
+        // Add message to chat
+        function addMessage(text, sender) {
+            const messagesContainer = document.getElementById('chat-messages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'chat-message mb-4';
+            
+            if (sender === 'user') {
+                messageDiv.innerHTML = `
+                    <div class="flex items-start justify-end">
+                        <div class="bg-gradient-to-r from-purple-600 to-indigo-600 rounded-lg p-4 shadow-sm max-w-2xl">
+                            <p class="text-sm text-white"><strong>You:</strong> ${text}</p>
+                        </div>
+                        <div class="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center ml-3 flex-shrink-0">
+                            <i class="fas fa-user text-white"></i>
+                        </div>
+                    </div>
+                `;
+            } else {
+                messageDiv.innerHTML = `
+                    <div class="flex items-start">
+                        <div class="w-10 h-10 bg-purple-600 rounded-full flex items-center justify-center mr-3 flex-shrink-0">
+                            <i class="fas fa-robot text-white"></i>
+                        </div>
+                        <div class="bg-white rounded-lg p-4 shadow-sm max-w-2xl">
+                            <p class="text-sm text-gray-800"><strong>BIT Tutor AI:</strong> ${text}</p>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            messagesContainer.appendChild(messageDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        // Show typing indicator
+        function showTypingIndicator() {
+            const messagesContainer = document.getElementById('chat-messages');
+            const typingDiv = document.createElement('div');
+            typingDiv.id = 'typing-indicator';
+            typingDiv.className = 'chat-message mb-4';
+            typingDiv.innerHTML = `
+                <div class="flex items-start">
+                    <div class="w-10 h-10 bg-purple-600 rounded-full flex items-center justify-center mr-3 flex-shrink-0">
+                        <i class="fas fa-robot text-white"></i>
+                    </div>
+                    <div class="bg-white rounded-lg p-4 shadow-sm">
+                        <p class="text-sm text-gray-600">
+                            <i class="fas fa-spinner fa-spin mr-2"></i>BIT Tutor AI is typing...
+                        </p>
+                    </div>
+                </div>
+            `;
+            messagesContainer.appendChild(typingDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        // Remove typing indicator
+        function removeTypingIndicator() {
+            const indicator = document.getElementById('typing-indicator');
+            if (indicator) {
+                indicator.remove();
+            }
+        }
+    </script>
+</body>
+</html>
+

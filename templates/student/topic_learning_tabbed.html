@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ topic.name }} - Learning Portal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        .tab-button {
+            transition: all 0.3s ease;
+        }
+        .tab-button.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .video-container {
+            position: relative;
+            padding-bottom: 56.25%;
+            height: 0;
+            overflow: hidden;
+        }
+        .video-container iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+        /* Chatbot Styles */
+        .chatbot-container {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 380px;
+            max-height: 600px;
+            z-index: 1000;
+            transition: all 0.3s ease;
+        }
+        .chatbot-minimized {
+            max-height: 60px;
+        }
+        .chat-messages {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .chat-message {
+            animation: slideIn 0.3s ease;
+        }
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 min-h-screen pb-24">
+    <!-- Header -->
+    <div class="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h1 class="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                        <i class="fas fa-graduation-cap mr-2"></i>{{ topic.name }}
+                    </h1>
+                    <p class="text-sm text-gray-600 mt-1">{{ topic.description }}</p>
+                </div>
+                <a href="/student/{{ student_id }}/dashboard"
+                   class="px-4 py-2 bg-gradient-to-r from-gray-600 to-gray-700 text-white rounded-lg hover:shadow-lg transition">
+                    <i class="fas fa-arrow-left mr-2"></i>Back to Dashboard
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Pre-Topic Assessment Banner -->
+        <div class="glass-card rounded-xl p-6 shadow-lg mb-8 bg-gradient-to-r from-red-50 to-pink-50 border-2 border-red-200">
+            <div class="flex items-center justify-between">
+                <div class="flex-1">
+                    <h2 class="text-xl font-bold text-gray-900 mb-2">
+                        <i class="fas fa-clipboard-check mr-2 text-red-600"></i>Pre-Topic Assessment
+                    </h2>
+                    <p class="text-gray-700 text-sm">
+                        📊 Test your current knowledge before learning. This helps us personalize your experience!
+                    </p>
+                </div>
+                <a href="/student/{{ student_id }}/assessment/topic/{{ topic.name }}"
+                   class="px-6 py-3 bg-gradient-to-r from-red-600 to-pink-600 text-white rounded-lg hover:shadow-xl transition transform hover:scale-105 font-semibold whitespace-nowrap">
+                    <i class="fas fa-play mr-2"></i>Start Assessment
+                </a>
+            </div>
+        </div>
+
+        <!-- Tabs Navigation -->
+        <div class="glass-card rounded-xl p-2 shadow-lg mb-8">
+            <div class="flex flex-wrap gap-2">
+                <button onclick="switchTab('videos')"
+                        class="tab-button active flex-1 px-6 py-3 rounded-lg font-semibold transition"
+                        id="tab-videos">
+                    <i class="fas fa-video mr-2"></i>Videos ({{ videos|length }})
+                </button>
+                <button onclick="switchTab('readings')"
+                        class="tab-button flex-1 px-6 py-3 rounded-lg font-semibold transition"
+                        id="tab-readings">
+                    <i class="fas fa-book-reader mr-2"></i>Reading ({{ readings|length }})
+                </button>
+                <button onclick="switchTab('lab')"
+                        class="tab-button flex-1 px-6 py-3 rounded-lg font-semibold transition"
+                        id="tab-lab">
+                    <i class="fas fa-flask mr-2"></i>Lab
+                </button>
+                <button onclick="switchTab('quiz')"
+                        class="tab-button flex-1 px-6 py-3 rounded-lg font-semibold transition"
+                        id="tab-quiz">
+                    <i class="fas fa-question-circle mr-2"></i>Quiz
+                </button>
+            </div>
+        </div>
+
+        <!-- Tab Contents -->
+        <div class="space-y-8">
+            <!-- Videos Tab -->
+            <div id="content-videos" class="tab-content active">
+                <div class="glass-card rounded-xl p-6 shadow-lg">
+                    <h2 class="text-2xl font-bold text-gray-900 mb-6">
+                        <i class="fas fa-play-circle mr-2 text-blue-600"></i>Video Lectures
+                    </h2>
+                    {% if videos %}
+                    <div class="space-y-6">
+                        {% for video in videos %}
+                        <div class="border border-gray-200 rounded-lg overflow-hidden bg-white">
+                            <div class="video-container">
+                                <iframe src="{{ video.url }}"
+                                        frameborder="0"
+                                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                        allowfullscreen>
+                                </iframe>
+                            </div>
+                            <div class="p-4">
+                                <h3 class="font-semibold text-gray-900 text-lg">{{ video.title }}</h3>
+                                <p class="text-sm text-gray-600 mt-1">
+                                    <i class="fas fa-clock mr-1"></i>{{ video.duration }} minutes
+                                </p>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="text-center py-12 text-gray-500">
+                        <i class="fas fa-video-slash text-6xl mb-4"></i>
+                        <p>No videos available for this topic yet.</p>
+                        <button onclick="refreshVideos()" class="mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Refresh from online sources</button>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Readings Tab -->
+            <div id="content-readings" class="tab-content">
+                <div class="glass-card rounded-xl p-6 shadow-lg">
+                    <h2 class="text-2xl font-bold text-gray-900 mb-6">
+                        <i class="fas fa-book-reader mr-2 text-green-600"></i>Reading Materials
+                        <span class="text-sm font-normal text-gray-600 ml-2">(One article per concept)</span>
+                    </h2>
+                        <button onclick="refreshReadings()" class="ml-4 px-3 py-1.5 text-xs bg-green-600 text-white rounded hover:bg-green-700">Refresh</button>
+
+                    {% if readings %}
+                    <div class="space-y-4">
+                        {% for reading in readings %}
+                        <div class="border border-gray-200 rounded-lg p-5 bg-white hover:shadow-md transition">
+                            <div class="flex items-start justify-between">
+                                <div class="flex-1">
+                                    <div class="flex items-center mb-3">
+                                        <span class="px-3 py-1 bg-indigo-100 text-indigo-800 text-sm rounded-full mr-2 font-semibold">
+                                            📚 {{ reading.concept_name }}
+                                        </span>
+                                        <span class="px-3 py-1 bg-green-100 text-green-800 text-sm rounded-full font-semibold">
+                                            {{ reading.source }}
+                                        </span>
+                                    </div>
+                                    <h3 class="font-bold text-gray-900 text-lg mb-2">{{ reading.title }}</h3>
+                                    <p class="text-sm text-gray-600 mb-4">{{ reading.description }}</p>
+                                    <div class="flex gap-3">
+                                        <a href="{{ reading.blog_url }}"
+                                           class="inline-flex items-center px-4 py-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg hover:from-purple-700 hover:to-pink-700 transition font-semibold shadow-lg">
+                                            <i class="fas fa-blog mr-2"></i>Read Personalized Blog
+                                        </a>
+                                        {% if reading.url %}
+                                        <a href="{{ reading.url }}"
+                                           target="_blank"
+                                           class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-semibold">
+                                            <i class="fas fa-external-link-alt mr-2"></i>External Article
+                                        </a>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="text-center py-12 text-gray-500">
+                        <i class="fas fa-book-dead text-6xl mb-4"></i>
+                        <p>No reading materials available for this topic yet.</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Lab Tab -->
+            <div id="content-lab" class="tab-content">
+                <div class="glass-card rounded-xl p-6 shadow-lg">
+                    <h2 class="text-2xl font-bold text-gray-900 mb-6">
+                        <i class="fas fa-flask mr-2 text-purple-600"></i>Hands-On Lab
+                    </h2>
+                    {% if lab %}
+                    <div class="border border-purple-200 rounded-lg p-6 bg-purple-50">
+                        <div class="flex items-start justify-between mb-4">
+                            <div>
+                                <h3 class="text-xl font-semibold text-gray-900">{{ lab.title }}</h3>
+                                <p class="text-sm text-gray-600 mt-1">{{ lab.objective }}</p>
+                            </div>
+                            <span class="px-3 py-1 bg-purple-600 text-white text-sm rounded-full">
+                                {{ lab.difficulty }}
+                            </span>
+                        </div>
+                        <div class="mb-6">
+                            <h4 class="font-semibold text-gray-900 mb-2">What You'll Learn:</h4>
+                            <p class="text-gray-700 mb-4">{{ lab.objective }}</p>
+                            <div class="bg-blue-50 border-l-4 border-blue-500 p-4 rounded">
+                                <p class="text-sm text-blue-800">
+                                    <i class="fas fa-info-circle mr-2"></i>
+                                    This lab uses an interactive Jupyter-style notebook where you can write and execute code,
+                                    get hints from an AI assistant, and practice the concepts you've learned.
+                                </p>
+                            </div>
+                        </div>
+                        <a href="/student/{{ student_id }}/learn/topics/{{ topic.name }}/labs/{{ lab.lab_id }}"
+                           class="inline-flex items-center px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition font-semibold">
+                            <i class="fas fa-code mr-2"></i>Open Interactive Notebook
+                        </a>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-12 text-gray-500">
+                        <i class="fas fa-flask text-6xl mb-4"></i>
+                        <p>No lab available for this topic yet.</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Quiz Tab -->
+            <div id="content-quiz" class="tab-content">
+                <div class="glass-card rounded-xl p-6 shadow-lg">
+                    <h2 class="text-2xl font-bold text-gray-900 mb-6">
+                        <i class="fas fa-question-circle mr-2 text-orange-600"></i>Topic Quiz
+                    </h2>
+                    {% if quiz %}
+                    <div class="border border-orange-200 rounded-lg p-6 bg-orange-50">
+                        <div class="flex items-start justify-between mb-4">
+                            <div>
+                                <h3 class="text-xl font-semibold text-gray-900">{{ quiz.title }}</h3>
+                                <p class="text-sm text-gray-600 mt-1">Test your knowledge of this topic</p>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4 mb-6">
+                            <div class="bg-white rounded-lg p-4 text-center">
+                                <i class="fas fa-question text-2xl text-blue-600 mb-2"></i>
+                                <p class="text-sm text-gray-600">Questions</p>
+                                <p class="text-2xl font-bold text-gray-900">{{ quiz.total_questions }}</p>
+                            </div>
+                            <div class="bg-white rounded-lg p-4 text-center">
+                                <i class="fas fa-trophy text-2xl text-yellow-600 mb-2"></i>
+                                <p class="text-sm text-gray-600">Passing Score</p>
+                                <p class="text-2xl font-bold text-gray-900">70%</p>
+                            </div>
+                        </div>
+                        <a href="/student/{{ student_id }}/learn/topics/{{ topic.name }}/quiz"
+                           class="inline-flex items-center px-6 py-3 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition font-semibold">
+                            <i class="fas fa-play mr-2"></i>Start Quiz
+                        </a>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-12 text-gray-500">
+                        <i class="fas fa-question-circle text-6xl mb-4"></i>
+                        <p>No quiz available for this topic yet.</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- BIT Tutor AI Chatbot (Global) -->
+    <div id="chatbot" class="chatbot-container glass-card rounded-2xl shadow-2xl">
+        <div class="bg-gradient-to-r from-purple-600 to-indigo-600 text-white p-4 rounded-t-2xl cursor-pointer" onclick="toggleChatbot()">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center">
+                    <i class="fas fa-robot text-2xl mr-3"></i>
+                    <div>
+                        <h3 class="font-bold">BIT Tutor AI</h3>
+                        <p class="text-xs opacity-90">Always here to help!</p>
+                    </div>
+                </div>
+                <i class="fas fa-chevron-down" id="chatbot-toggle-icon"></i>
+            </div>
+        </div>
+        <div id="chatbot-body" class="bg-white p-4">
+            <div class="chat-messages mb-4" id="chat-messages">
+                <div class="chat-message mb-3">
+                    <div class="bg-purple-100 rounded-lg p-3">
+                        <p class="text-sm text-gray-800">
+                            <strong>BIT Tutor AI:</strong> Hi! I'm here to help you learn <strong>{{ topic.name }}</strong>. Ask me anything!
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="flex gap-2">
+                <input type="text"
+                       id="chat-input"
+                       placeholder="Ask a question..."
+                       class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-600"
+                       onkeypress="if(event.key==='Enter') sendMessage()">
+                <button onclick="sendMessage()"
+                        class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Tab switching
+        function switchTab(tabName) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            document.querySelectorAll('.tab-button').forEach(button => {
+                button.classList.remove('active');
+            });
+
+            // Show selected tab
+            document.getElementById(`content-${tabName}`).classList.add('active');
+            document.getElementById(`tab-${tabName}`).classList.add('active');
+        }
+
+        // Chatbot toggle
+        function toggleChatbot() {
+            const chatbot = document.getElementById('chatbot');
+            const icon = document.getElementById('chatbot-toggle-icon');
+            const body = document.getElementById('chatbot-body');
+
+            if (chatbot.classList.contains('chatbot-minimized')) {
+                chatbot.classList.remove('chatbot-minimized');
+                body.style.display = 'block';
+                icon.classList.remove('fa-chevron-up');
+                icon.classList.add('fa-chevron-down');
+            } else {
+                chatbot.classList.add('chatbot-minimized');
+                body.style.display = 'none';
+                icon.classList.remove('fa-chevron-down');
+                icon.classList.add('fa-chevron-up');
+            }
+        }
+
+        // Send message to chatbot
+        async function sendMessage() {
+            const input = document.getElementById('chat-input');
+            const message = input.value.trim();
+
+            if (!message) return;
+
+            // Add user message
+            addMessage(message, 'user');
+            input.value = '';
+
+            // Send to backend
+            try {
+                const response = await fetch('/student/{{ student_id }}/learn/api/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        message: message,
+                        topic: '{{ topic.name }}',
+                        context: 'learning'
+                    })
+                });
+
+                const data = await response.json();
+                addMessage(data.response || 'Sorry, I could not process that.', 'bot');
+            } catch (error) {
+                console.error('Error:', error);
+                addMessage('Sorry, I encountered an error. Please try again.', 'bot');
+            }
+        }
+
+        // Add message to chat
+        function addMessage(text, sender) {
+            const messagesContainer = document.getElementById('chat-messages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'chat-message mb-3';
+
+            if (sender === 'user') {
+                messageDiv.innerHTML = `
+                    <div class="bg-blue-100 rounded-lg p-3 ml-8">
+                        <p class="text-sm text-gray-800"><strong>You:</strong> ${text}</p>
+                    </div>
+                `;
+            } else {
+                messageDiv.innerHTML = `
+                    <div class="bg-purple-100 rounded-lg p-3 mr-8">
+                        <p class="text-sm text-gray-800"><strong>BIT Tutor AI:</strong> ${text}</p>
+                    </div>
+                `;
+            }
+
+            messagesContainer.appendChild(messageDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+    </script>
+
+        // Refresh helpers
+        async function refreshVideos() {
+            try {
+                const topicName = encodeURIComponent('{{ topic.name }}');
+                const res = await fetch(`/student/{{ student_id }}/learn/api/topics/${topicName}/refresh_videos`, { method: 'POST' });
+                const data = await res.json();
+                if (data.ok) location.reload();
+            } catch (e) { console.error(e); }
+        }
+        async function refreshReadings() {
+            try {
+                const topicName = encodeURIComponent('{{ topic.name }}');
+                const res = await fetch(`/student/{{ student_id }}/learn/api/topics/${topicName}/refresh_readings`, { method: 'POST' });
+                const data = await res.json();
+                if (data.ok) location.reload();
+            } catch (e) { console.error(e); }
+        }
+
+</body>
+</html>
+

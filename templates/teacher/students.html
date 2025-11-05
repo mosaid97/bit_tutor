@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Management - BIT Tutor</title>
+    
+    <!-- Tailwind CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/nexus.css') }}" rel="stylesheet">
+</head>
+<body class="bg-gradient-to-br from-blue-900 via-purple-900 to-indigo-900 min-h-screen">
+    
+    <!-- Navigation -->
+    <nav class="glass-card mx-4 mt-4 mb-6 p-4">
+        <div class="flex justify-between items-center">
+            <div class="flex items-center space-x-4">
+                <div class="text-3xl">👥</div>
+                <div>
+                    <h1 class="text-xl font-bold text-gray-800">Student Management</h1>
+                    <p class="text-sm text-gray-600">View and manage all students</p>
+                </div>
+            </div>
+            <div class="flex items-center space-x-4">
+                <a href="{{ url_for('teacher.dashboard') }}" 
+                   class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
+                    <i class="fas fa-arrow-left mr-2"></i>Back to Dashboard
+                </a>
+            </div>
+        </div>
+    </nav>
+    
+    <!-- Main Content -->
+    <div class="container mx-auto px-4 pb-8">
+        
+        <!-- Search and Filter -->
+        <div class="glass-card p-4 mb-6">
+            <div class="flex flex-col md:flex-row gap-4">
+                <div class="flex-1">
+                    <input type="text" 
+                           id="search-input"
+                           placeholder="Search students by name or ID..."
+                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                           onkeyup="filterStudents()">
+                </div>
+                <div>
+                    <select id="filter-status" 
+                            class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            onchange="filterStudents()">
+                        <option value="all">All Students</option>
+                        <option value="excellent">Excellent (≥70%)</option>
+                        <option value="good">Good (50-70%)</option>
+                        <option value="needs-help">Needs Help (<50%)</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Students Grid -->
+        <div id="students-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {% if students %}
+                {% for student in students %}
+                <div class="glass-card p-6 student-card" 
+                     data-name="{{ student.name|lower }}" 
+                     data-id="{{ student.student_id|lower }}"
+                     data-mastery="{{ student.mastery_level }}">
+                    
+                    <!-- Student Header -->
+                    <div class="flex items-center mb-4">
+                        <div class="w-16 h-16 rounded-full bg-gradient-to-br from-blue-400 to-purple-400 flex items-center justify-center text-white text-2xl font-bold mr-4">
+                            {{ student.name[0]|upper }}
+                        </div>
+                        <div class="flex-1">
+                            <h3 class="font-bold text-gray-800">{{ student.name }}</h3>
+                            <p class="text-sm text-gray-600">{{ student.student_id }}</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Stats -->
+                    <div class="grid grid-cols-2 gap-4 mb-4">
+                        <div class="text-center">
+                            <div class="text-2xl font-bold text-blue-600">{{ student.total_assessments }}</div>
+                            <div class="text-xs text-gray-600">Assessments</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-2xl font-bold text-green-600">{{ (student.average_score * 100)|round(1) }}%</div>
+                            <div class="text-xs text-gray-600">Avg Score</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Mastery Progress -->
+                    <div class="mb-4">
+                        <div class="flex justify-between text-xs text-gray-600 mb-1">
+                            <span>Mastery Level</span>
+                            <span>{{ (student.mastery_level * 100)|round(1) }}%</span>
+                        </div>
+                        <div class="w-full bg-gray-200 rounded-full h-2">
+                            <div class="h-2 rounded-full transition-all duration-500"
+                                 style="width: {{ (student.mastery_level * 100)|round(1) }}%; 
+                                        background: {% if student.mastery_level >= 0.7 %}#10b981{% elif student.mastery_level >= 0.5 %}#f59e0b{% else %}#ef4444{% endif %}"></div>
+                        </div>
+                    </div>
+                    
+                    <!-- Status Badge -->
+                    <div class="mb-4">
+                        {% if student.mastery_level >= 0.7 %}
+                            <span class="px-3 py-1 bg-green-100 text-green-800 rounded-full text-xs">
+                                <i class="fas fa-star mr-1"></i>Excellent
+                            </span>
+                        {% elif student.mastery_level >= 0.5 %}
+                            <span class="px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-xs">
+                                <i class="fas fa-thumbs-up mr-1"></i>Good
+                            </span>
+                        {% else %}
+                            <span class="px-3 py-1 bg-red-100 text-red-800 rounded-full text-xs">
+                                <i class="fas fa-exclamation-triangle mr-1"></i>Needs Help
+                            </span>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Actions -->
+                    <div class="flex gap-2">
+                        <a href="{{ url_for('teacher.student_detail', student_id=student.student_id) }}" 
+                           class="flex-1 text-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition text-sm">
+                            <i class="fas fa-eye mr-1"></i>View Details
+                        </a>
+                        <a href="{{ url_for('student_portfolio.portfolio', student_id=student.student_id) }}" 
+                           class="flex-1 text-center px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition text-sm">
+                            <i class="fas fa-folder mr-1"></i>Portfolio
+                        </a>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="col-span-3 glass-card p-12 text-center">
+                    <i class="fas fa-users text-6xl text-gray-400 mb-4"></i>
+                    <h3 class="text-xl font-bold text-gray-600 mb-2">No Students Enrolled</h3>
+                    <p class="text-gray-500">Students will appear here once they are enrolled in the platform</p>
+                </div>
+            {% endif %}
+        </div>
+        
+        <!-- No Results Message -->
+        <div id="no-results" class="hidden glass-card p-12 text-center">
+            <i class="fas fa-search text-6xl text-gray-400 mb-4"></i>
+            <h3 class="text-xl font-bold text-gray-600 mb-2">No Students Found</h3>
+            <p class="text-gray-500">Try adjusting your search or filter criteria</p>
+        </div>
+        
+    </div>
+    
+    <script>
+        function filterStudents() {
+            const searchTerm = document.getElementById('search-input').value.toLowerCase();
+            const statusFilter = document.getElementById('filter-status').value;
+            const studentCards = document.querySelectorAll('.student-card');
+            let visibleCount = 0;
+            
+            studentCards.forEach(card => {
+                const name = card.getAttribute('data-name');
+                const id = card.getAttribute('data-id');
+                const mastery = parseFloat(card.getAttribute('data-mastery'));
+                
+                // Check search term
+                const matchesSearch = name.includes(searchTerm) || id.includes(searchTerm);
+                
+                // Check status filter
+                let matchesStatus = true;
+                if (statusFilter === 'excellent') {
+                    matchesStatus = mastery >= 0.7;
+                } else if (statusFilter === 'good') {
+                    matchesStatus = mastery >= 0.5 && mastery < 0.7;
+                } else if (statusFilter === 'needs-help') {
+                    matchesStatus = mastery < 0.5;
+                }
+                
+                // Show/hide card
+                if (matchesSearch && matchesStatus) {
+                    card.style.display = 'block';
+                    visibleCount++;
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+            
+            // Show/hide no results message
+            const noResults = document.getElementById('no-results');
+            const studentsGrid = document.getElementById('students-grid');
+            
+            if (visibleCount === 0) {
+                studentsGrid.style.display = 'none';
+                noResults.classList.remove('hidden');
+            } else {
+                studentsGrid.style.display = 'grid';
+                noResults.classList.add('hidden');
+            }
+        }
+    </script>
+    
+</body>
+</html>
+

@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Graded Quiz - {{ topic_name }} - BIT Tutor</title>
+    
+    <!-- Tailwind CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/nexus.css') }}" rel="stylesheet">
+    <style>
+        /* Ensure text is always visible */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.98) !important;
+        }
+        #question-text, #question-number, .question-label {
+            color: #1f2937 !important;
+            font-weight: 600;
+        }
+        .answer-option-text {
+            color: #1f2937 !important;
+            font-weight: 500;
+        }
+        .answer-option {
+            background: rgba(255, 255, 255, 0.95);
+            border: 2px solid #d1d5db;
+        }
+        .answer-option.selected {
+            background: rgba(16, 185, 129, 0.1);
+            border-color: #10b981;
+        }
+        .answer-option:hover {
+            border-color: #10b981;
+            background: rgba(16, 185, 129, 0.05);
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-blue-900 via-purple-900 to-indigo-900 min-h-screen">
+    
+    <!-- Navigation -->
+    <nav class="glass-card mx-4 mt-4 mb-6 p-4">
+        <div class="flex justify-between items-center">
+            <div class="flex items-center space-x-4">
+                <div class="text-3xl">🎓</div>
+                <div>
+                    <h1 class="text-xl font-bold text-gray-800">Graded Quiz</h1>
+                    <p class="text-sm text-gray-600">{{ topic_name }}</p>
+                </div>
+            </div>
+            <div class="flex items-center space-x-4">
+                <div class="text-sm text-gray-600">
+                    <i class="fas fa-clock mr-2"></i>
+                    <span id="timer">--:--</span>
+                </div>
+                <a href="/student/{{ student_id }}/learn/topics/{{ topic_name }}"
+                   class="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition">
+                    <i class="fas fa-arrow-left mr-2"></i>Back to Topic
+                </a>
+            </div>
+        </div>
+    </nav>
+    
+    <!-- Main Content -->
+    <div class="container mx-auto px-4 pb-8 max-w-4xl">
+        
+        <!-- Instructions -->
+        <div id="instructions-panel" class="glass-card p-6 mb-8">
+            <h2 class="text-2xl font-bold text-gray-800 mb-4">
+                <i class="fas fa-info-circle mr-2"></i>Quiz Instructions
+            </h2>
+            
+            <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
+                <div class="flex items-start">
+                    <div class="text-2xl mr-3">⚠️</div>
+                    <div>
+                        <h3 class="font-bold text-yellow-800 mb-2">Important Notice</h3>
+                        <p class="text-yellow-700">This is a GRADED quiz. Your score will count toward your final grade.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="space-y-3 text-gray-700 mb-6">
+                <p><i class="fas fa-check text-green-600 mr-2"></i>This quiz contains 15 multiple-choice questions</p>
+                <p><i class="fas fa-check text-green-600 mr-2"></i>You must score at least 70% to pass</p>
+                <p><i class="fas fa-check text-green-600 mr-2"></i>You can take this quiz up to 3 times</p>
+                <p><i class="fas fa-check text-green-600 mr-2"></i>Your highest score will be recorded</p>
+                <p><i class="fas fa-check text-green-600 mr-2"></i>Take your time and read each question carefully</p>
+            </div>
+            
+            <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+                <h3 class="font-semibold text-blue-800 mb-2">Prerequisites</h3>
+                <p class="text-blue-700 text-sm">
+                    ✅ Complete the pre-topic assessment<br>
+                    ✅ Review recommended learning materials<br>
+                    ✅ Practice with hands-on labs
+                </p>
+            </div>
+            
+            <div class="flex justify-center">
+                <button onclick="startQuiz()" 
+                        class="px-8 py-3 bg-gradient-to-r from-green-600 to-blue-600 text-white font-bold rounded-lg hover:from-green-700 hover:to-blue-700 transition transform hover:scale-105">
+                    <i class="fas fa-play mr-2"></i>Start Graded Quiz
+                </button>
+            </div>
+        </div>
+        
+        <!-- Quiz Panel (Hidden Initially) -->
+        <div id="quiz-panel" class="hidden">
+            
+            <!-- Progress Bar -->
+            <div class="glass-card p-4 mb-6">
+                <div class="flex justify-between text-sm text-gray-600 mb-2">
+                    <span>Question <span id="current-question">1</span> of <span id="total-questions">15</span></span>
+                    <span id="progress-percentage">7%</span>
+                </div>
+                <div class="w-full bg-gray-200 rounded-full h-2">
+                    <div id="progress-bar" class="bg-gradient-to-r from-green-600 to-blue-600 h-2 rounded-full transition-all duration-300" style="width: 7%"></div>
+                </div>
+            </div>
+            
+            <!-- Question Card -->
+            <div class="glass-card p-6 mb-6">
+                <div class="mb-6">
+                    <div class="question-label text-sm mb-2" style="color: #4b5563 !important; font-weight: 600;">
+                        Question <span id="question-number">1</span>
+                    </div>
+                    <h3 id="question-text" class="text-xl font-semibold" style="color: #1f2937 !important; font-weight: 700;">
+                        <!-- Question text will be inserted here -->
+                    </h3>
+                </div>
+
+                <!-- Answer Options -->
+                <div id="answer-options" class="space-y-3">
+                    <!-- Options will be inserted here -->
+                </div>
+            </div>
+            
+            <!-- Navigation Buttons -->
+            <div class="flex justify-between">
+                <button id="prev-btn" 
+                        onclick="previousQuestion()" 
+                        class="px-6 py-3 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition"
+                        disabled>
+                    <i class="fas fa-arrow-left mr-2"></i>Previous
+                </button>
+                
+                <button id="next-btn" 
+                        onclick="nextQuestion()" 
+                        class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
+                    Next<i class="fas fa-arrow-right ml-2"></i>
+                </button>
+                
+                <button id="submit-btn" 
+                        onclick="submitQuiz()" 
+                        class="hidden px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition">
+                    <i class="fas fa-check mr-2"></i>Submit Quiz
+                </button>
+            </div>
+            
+        </div>
+        
+        <!-- Results Panel (Hidden Initially) -->
+        <div id="results-panel" class="hidden">
+            <div class="glass-card p-8">
+                <div class="text-center mb-8">
+                    <div id="result-icon" class="text-6xl mb-4">🎉</div>
+                    <h2 class="text-3xl font-bold text-gray-800 mb-2">Quiz Complete!</h2>
+                    <p id="result-message" class="text-gray-600 mb-6">Calculating your score...</p>
+                </div>
+                
+                <div id="score-display" class="hidden">
+                    <!-- Score breakdown -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                        <div class="text-center">
+                            <div class="text-5xl font-bold mb-2" id="final-score">--</div>
+                            <div class="text-gray-600">Final Score</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-5xl font-bold text-blue-600 mb-2" id="correct-count">--</div>
+                            <div class="text-gray-600">Correct Answers</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-5xl font-bold text-purple-600 mb-2" id="grade-letter">--</div>
+                            <div class="text-gray-600">Grade</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Pass/Fail Message -->
+                    <div id="pass-fail-message" class="rounded-lg p-6 mb-6">
+                        <!-- Will be populated based on score -->
+                    </div>
+                    
+                    <!-- Actions -->
+                    <div class="flex justify-center space-x-4 flex-wrap gap-3">
+                        <a href="/student/{{ student_id }}/learn/topics/{{ topic_name }}"
+                           class="px-6 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition">
+                            <i class="fas fa-arrow-left mr-2"></i>Back to Topic
+                        </a>
+                        <a href="/student/{{ student_id }}/progress"
+                           class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
+                            <i class="fas fa-chart-line mr-2"></i>My Progress
+                        </a>
+                        <a href="/student/{{ student_id }}/dashboard"
+                           class="px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition">
+                            <i class="fas fa-home mr-2"></i>Dashboard
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+    </div>
+    
+    <script>
+        let quizData = null;
+        let currentQuestionIndex = 0;
+        let answers = {};
+        let startTime = null;
+        let timerInterval = null;
+        
+        // Start the quiz
+        async function startQuiz() {
+            document.getElementById('instructions-panel').classList.add('hidden');
+            document.getElementById('quiz-panel').classList.remove('hidden');
+            
+            // Generate quiz
+            try {
+                const response = await fetch('/student/{{ student_id }}/learn/api/quiz/generate', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        topic_name: '{{ topic_name }}',
+                        num_questions: 15
+                    })
+                });
+
+                const data = await response.json();
+
+                if (!data.success) {
+                    throw new Error(data.error || 'Failed to generate quiz');
+                }
+
+                quizData = data.quiz;
+                
+                // Update total questions
+                document.getElementById('total-questions').textContent = quizData.total_questions;
+                
+                // Start timer
+                startTime = Date.now();
+                startTimer();
+                
+                // Display first question
+                displayQuestion(0);
+                
+            } catch (error) {
+                console.error('Error generating quiz:', error);
+                alert('Error generating quiz. Please try again.');
+            }
+        }
+        
+        // Display a question
+        function displayQuestion(index) {
+            if (!quizData || !quizData.questions) return;
+
+            const question = quizData.questions[index];
+            currentQuestionIndex = index;
+
+            // Update question number and text
+            document.getElementById('question-number').textContent = index + 1;
+            document.getElementById('current-question').textContent = index + 1;
+            document.getElementById('question-text').textContent = question.question || question.text;
+            
+            // Update progress
+            const progress = ((index + 1) / quizData.total_questions) * 100;
+            document.getElementById('progress-bar').style.width = progress + '%';
+            document.getElementById('progress-percentage').textContent = Math.round(progress) + '%';
+            
+            // Display options
+            const optionsContainer = document.getElementById('answer-options');
+            optionsContainer.innerHTML = '';
+
+            // Parse options - handle both array and object formats
+            let optionsArray = [];
+            if (Array.isArray(question.options)) {
+                optionsArray = question.options;
+            } else if (typeof question.options === 'object') {
+                // Convert object to array
+                optionsArray = Object.values(question.options);
+            } else if (typeof question.options === 'string') {
+                // Try to parse JSON string
+                try {
+                    const parsed = JSON.parse(question.options);
+                    optionsArray = Array.isArray(parsed) ? parsed : Object.values(parsed);
+                } catch (e) {
+                    console.error('Error parsing options:', e);
+                    optionsArray = [question.options];
+                }
+            }
+
+            optionsArray.forEach((option, optionIndex) => {
+                const isSelected = answers[question.question_id] === optionIndex;
+
+                const optionDiv = document.createElement('div');
+                optionDiv.className = `answer-option p-4 rounded-lg cursor-pointer transition ${
+                    isSelected ? 'selected' : ''
+                }`;
+                optionDiv.onclick = () => selectAnswer(question.question_id, optionIndex);
+
+                optionDiv.innerHTML = `
+                    <div class="flex items-center">
+                        <div class="w-6 h-6 rounded-full border-2 ${
+                            isSelected ? 'border-green-600 bg-green-600' : 'border-gray-400 bg-white'
+                        } flex items-center justify-center mr-3">
+                            ${isSelected ? '<i class="fas fa-check text-white text-xs"></i>' : ''}
+                        </div>
+                        <span class="answer-option-text" style="color: #1f2937 !important; font-weight: 500;">${option}</span>
+                    </div>
+                `;
+
+                optionsContainer.appendChild(optionDiv);
+            });
+            
+            // Update navigation buttons
+            document.getElementById('prev-btn').disabled = index === 0;
+            
+            if (index === quizData.total_questions - 1) {
+                document.getElementById('next-btn').classList.add('hidden');
+                document.getElementById('submit-btn').classList.remove('hidden');
+            } else {
+                document.getElementById('next-btn').classList.remove('hidden');
+                document.getElementById('submit-btn').classList.add('hidden');
+            }
+        }
+        
+        // Select an answer
+        function selectAnswer(questionId, optionIndex) {
+            answers[questionId] = optionIndex;
+            displayQuestion(currentQuestionIndex);
+        }
+        
+        // Navigate to previous question
+        function previousQuestion() {
+            if (currentQuestionIndex > 0) {
+                displayQuestion(currentQuestionIndex - 1);
+            }
+        }
+        
+        // Navigate to next question
+        function nextQuestion() {
+            if (currentQuestionIndex < quizData.total_questions - 1) {
+                displayQuestion(currentQuestionIndex + 1);
+            }
+        }
+        
+        // Submit quiz
+        async function submitQuiz() {
+            // Check if all questions are answered
+            const unanswered = quizData.questions.filter(q => !(q.question_id in answers));
+            if (unanswered.length > 0) {
+                if (!confirm(`You have ${unanswered.length} unanswered question(s). Submit anyway?`)) {
+                    return;
+                }
+            }
+            
+            // Show results panel
+            document.getElementById('quiz-panel').classList.add('hidden');
+            document.getElementById('results-panel').classList.remove('hidden');
+            
+            // Stop timer
+            if (timerInterval) {
+                clearInterval(timerInterval);
+            }
+            
+            // Submit to server
+            try {
+                const response = await fetch('/student/{{ student_id }}/api/quiz/submit', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        quiz_id: quizData.quiz_id,
+                        topic_name: '{{ topic_name }}',
+                        answers: answers,
+                        time_taken: Math.floor((Date.now() - startTime) / 1000)
+                    })
+                });
+                
+                const results = await response.json();
+                displayResults(results);
+                
+            } catch (error) {
+                console.error('Error submitting quiz:', error);
+                alert('Error submitting quiz. Please try again.');
+            }
+        }
+        
+        // Display results
+        function displayResults(results) {
+            const score = results.score * 100;
+            const passed = score >= 70;
+            
+            // Update icon and message
+            document.getElementById('result-icon').textContent = passed ? '🎉' : '💪';
+            document.getElementById('result-message').textContent = passed ? 
+                'Congratulations! You passed!' : 
+                'Keep practicing! You can retake this quiz.';
+            
+            // Show score display
+            document.getElementById('score-display').classList.remove('hidden');
+            
+            // Update scores
+            document.getElementById('final-score').textContent = score.toFixed(1) + '%';
+            document.getElementById('final-score').style.color = passed ? '#10b981' : '#ef4444';
+            document.getElementById('correct-count').textContent = results.correct + '/' + results.total;
+            
+            // Calculate letter grade
+            let grade = 'F';
+            if (score >= 90) grade = 'A';
+            else if (score >= 80) grade = 'B';
+            else if (score >= 70) grade = 'C';
+            else if (score >= 60) grade = 'D';
+            document.getElementById('grade-letter').textContent = grade;
+            
+            // Pass/fail message
+            const messageDiv = document.getElementById('pass-fail-message');
+            if (passed) {
+                messageDiv.className = 'bg-green-50 border border-green-200 rounded-lg p-6 mb-6';
+                messageDiv.innerHTML = `
+                    <div class="flex items-start">
+                        <div class="text-3xl mr-4">✅</div>
+                        <div>
+                            <h3 class="font-bold text-green-800 mb-2">Quiz Passed!</h3>
+                            <p class="text-green-700">Great job! You've demonstrated mastery of this topic.</p>
+                        </div>
+                    </div>
+                `;
+            } else {
+                messageDiv.className = 'bg-yellow-50 border border-yellow-200 rounded-lg p-6 mb-6';
+                messageDiv.innerHTML = `
+                    <div class="flex items-start">
+                        <div class="text-3xl mr-4">📚</div>
+                        <div>
+                            <h3 class="font-bold text-yellow-800 mb-2">Keep Learning!</h3>
+                            <p class="text-yellow-700">Review the recommended materials and try again. You have ${3 - (results.attempt_number || 1)} attempts remaining.</p>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+        
+        // Timer
+        function startTimer() {
+            timerInterval = setInterval(() => {
+                const elapsed = Math.floor((Date.now() - startTime) / 1000);
+                const minutes = Math.floor(elapsed / 60);
+                const seconds = elapsed % 60;
+                document.getElementById('timer').textContent = 
+                    `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            }, 1000);
+        }
+    </script>
+    
+</body>
+</html>
+

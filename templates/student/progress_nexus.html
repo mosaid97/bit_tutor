@@ -1,0 +1,1572 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Progress - BIT Tutor Nexus AI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- D3.js for mind map -->
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        * { font-family: 'Inter', sans-serif; }
+        
+        .nexus-gradient {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+        }
+        
+        .glass-card {
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(30, 64, 175, 0.2);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+        
+        .ai-insight {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border-radius: 15px;
+            padding: 1rem;
+            margin: 0.5rem 0;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .ai-insight::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            animation: shimmer 3s infinite;
+        }
+        
+        @keyframes shimmer {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+
+        /* AI Chatbot Popup Styles */
+        .chatbot-popup {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 400px;
+            max-height: 600px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            display: none;
+            flex-direction: column;
+            z-index: 1000;
+        }
+
+        .chatbot-popup.active {
+            display: flex;
+        }
+
+        .chatbot-header {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 1rem;
+            border-radius: 20px 20px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .chatbot-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1rem;
+            max-height: 400px;
+        }
+
+        .chatbot-message {
+            margin-bottom: 1rem;
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .chatbot-message.user {
+            justify-content: flex-end;
+        }
+
+        .chatbot-message.bot .message-content {
+            background: #f3f4f6;
+            color: #1f2937;
+        }
+
+        .chatbot-message.user .message-content {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+
+        .message-content {
+            padding: 0.75rem 1rem;
+            border-radius: 15px;
+            max-width: 80%;
+        }
+
+        .chatbot-input-area {
+            padding: 1rem;
+            border-top: 1px solid #e5e7eb;
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .chatbot-fab {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 4px 20px rgba(102, 126, 234, 0.4);
+            transition: all 0.3s ease;
+            z-index: 999;
+        }
+
+        .chatbot-fab:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 30px rgba(102, 126, 234, 0.6);
+        }
+
+        .chatbot-fab.hidden {
+            display: none;
+        }
+
+        .recommendation-card {
+            background: linear-gradient(135deg, #ff9a9e, #fecfef);
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin: 1rem 0;
+            color: #2d3748;
+            transition: all 0.3s ease;
+        }
+        
+        .recommendation-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.1);
+        }
+
+        .stat-card {
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.15);
+        }
+
+        /* Mind Map Styles */
+        #mindMap {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        .node circle {
+            cursor: pointer;
+            stroke-width: 3px;
+        }
+
+        .node text {
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .link {
+            fill: none;
+            stroke-width: 2px;
+            opacity: 0.6;
+        }
+
+        /* Enhanced G-CDM Visualization */
+        .gcdm-node {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .gcdm-node:hover {
+            transform: scale(1.05);
+        }
+
+        .mastery-high { background: linear-gradient(135deg, #10b981, #059669); }
+        .mastery-medium { background: linear-gradient(135deg, #f59e0b, #d97706); }
+        .mastery-low { background: linear-gradient(135deg, #ef4444, #dc2626); }
+
+        .concept-card {
+            border-left: 4px solid;
+            transition: all 0.3s ease;
+        }
+
+        .concept-card:hover {
+            transform: translateX(5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body class="nexus-gradient min-h-screen">
+    <!-- Navigation -->
+    <nav class="bg-white shadow-lg sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center">
+                    <i class="fas fa-brain text-purple-600 text-2xl mr-3"></i>
+                    <span class="text-xl font-bold text-gray-800">My Progress - Nexus AI</span>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <a href="/student/{{ student_id }}/dashboard"
+                       class="px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg hover:shadow-lg transition transform hover:scale-105">
+                        <i class="fas fa-arrow-left mr-2"></i>
+                        Back to Dashboard
+                    </a>
+                    <a href="/student/{{ student_id }}/learn/topics"
+                       class="px-4 py-2 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-lg hover:shadow-lg transition transform hover:scale-105">
+                        <i class="fas fa-book mr-2"></i>
+                        Browse Topics
+                    </a>
+                    <a href="{{ url_for('student_portal.logout') }}"
+                       class="text-red-600 hover:text-red-700 transition">
+                        <i class="fas fa-sign-out-alt mr-1"></i>
+                        Logout
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Breadcrumb -->
+    <div class="bg-gray-50 border-b border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
+            <div class="flex items-center text-sm text-gray-600">
+                <a href="/student/{{ student_id }}/dashboard" class="hover:text-purple-600 transition">
+                    <i class="fas fa-home mr-2"></i>
+                    Dashboard
+                </a>
+                <i class="fas fa-chevron-right mx-2 text-xs"></i>
+                <span class="font-semibold text-purple-600">My Progress</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Overall Statistics -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            <div class="stat-card glass-card rounded-xl p-6 text-center">
+                <div class="text-4xl font-bold text-blue-600 mb-2">{{ overall_score }}%</div>
+                <div class="text-sm text-gray-600">Overall Score</div>
+            </div>
+            <div class="stat-card glass-card rounded-xl p-6 text-center">
+                <div class="text-4xl font-bold text-green-600 mb-2">{{ mastered_concepts }}</div>
+                <div class="text-sm text-gray-600">Mastered Concepts</div>
+            </div>
+            <div class="stat-card glass-card rounded-xl p-6 text-center">
+                <div class="text-4xl font-bold text-purple-600 mb-2">{{ topics_completed }}</div>
+                <div class="text-sm text-gray-600">Topics Completed</div>
+            </div>
+            <div class="stat-card glass-card rounded-xl p-6 text-center">
+                <div class="text-4xl font-bold text-orange-600 mb-2">{{ learning_streak }}</div>
+                <div class="text-sm text-gray-600">Day Streak 🔥</div>
+            </div>
+        </div>
+
+        <!-- Main Grid Layout -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Left Column - Charts -->
+            <div class="lg:col-span-2 space-y-6">
+                <!-- Skill Mastery Spider Web -->
+                <div class="glass-card rounded-2xl p-6">
+                    <h3 class="text-xl font-bold text-gray-800 mb-4">
+                        <i class="fas fa-spider mr-2 text-green-500"></i>Skill Mastery Web
+                    </h3>
+                    <div class="flex justify-center">
+                        <canvas id="skillRadarChart" style="max-height: 400px;"></canvas>
+                    </div>
+                </div>
+
+                <!-- Student Knowledge Mind Map -->
+                <div class="glass-card rounded-2xl p-6">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-xl font-bold text-gray-800">
+                            <i class="fas fa-brain mr-2 text-purple-500"></i>Knowledge Mind Map
+                            <span class="text-sm font-normal text-gray-600 ml-2">Interactive visualization of your learning journey</span>
+                        </h3>
+                        <div class="flex gap-2">
+                            <button onclick="resetMindMapZoom()" class="px-3 py-1 bg-purple-100 text-purple-700 rounded-lg hover:bg-purple-200 transition text-sm">
+                                <i class="fas fa-compress-arrows-alt mr-1"></i>Reset View
+                            </button>
+                            <button onclick="centerMindMap()" class="px-3 py-1 bg-indigo-100 text-indigo-700 rounded-lg hover:bg-indigo-200 transition text-sm">
+                                <i class="fas fa-crosshairs mr-1"></i>Center
+                            </button>
+                        </div>
+                    </div>
+                    <div id="mindMap" class="border-2 border-gray-200 rounded-xl overflow-hidden bg-gradient-to-br from-purple-50 to-indigo-50" style="width: 100%; height: 600px; position: relative;"></div>
+                    <!-- Enhanced Legend -->
+                    <div class="mt-4 p-4 bg-gradient-to-br from-gray-50 to-gray-100 rounded-lg border border-gray-200">
+                        <div class="text-sm font-bold text-gray-800 mb-3 flex items-center">
+                            <i class="fas fa-info-circle mr-2 text-blue-500"></i>
+                            Knowledge Map Guide
+                        </div>
+                        <div class="grid grid-cols-2 md:grid-cols-3 gap-3 text-xs">
+                            <div class="flex items-center gap-2 p-2 bg-white rounded-lg">
+                                <div class="w-5 h-5 rounded-full bg-purple-600 flex items-center justify-center flex-shrink-0">
+                                    <i class="fas fa-user text-white" style="font-size: 9px;"></i>
+                                </div>
+                                <span class="text-gray-700 font-medium">You (Center)</span>
+                            </div>
+                            <div class="flex items-center gap-2 p-2 bg-white rounded-lg">
+                                <div class="w-5 h-5 rounded-full bg-indigo-600 flex items-center justify-center flex-shrink-0">
+                                    <i class="fas fa-trophy text-white" style="font-size: 9px;"></i>
+                                </div>
+                                <span class="text-gray-700 font-medium">Course Goal</span>
+                            </div>
+                            <div class="flex items-center gap-2 p-2 bg-white rounded-lg">
+                                <div class="w-5 h-5 rounded-full bg-blue-500 flex items-center justify-center flex-shrink-0">
+                                    <i class="fas fa-flag text-white" style="font-size: 9px;"></i>
+                                </div>
+                                <span class="text-gray-700 font-medium">Milestones</span>
+                            </div>
+                            <div class="flex items-center gap-2 p-2 bg-white rounded-lg">
+                                <div class="w-5 h-5 rounded-full bg-green-500 flex items-center justify-center flex-shrink-0">
+                                    <i class="fas fa-check text-white" style="font-size: 9px;"></i>
+                                </div>
+                                <span class="text-gray-700 font-medium">Mastered (≥80%)</span>
+                            </div>
+                            <div class="flex items-center gap-2 p-2 bg-white rounded-lg">
+                                <div class="w-5 h-5 rounded-full bg-yellow-500 flex items-center justify-center flex-shrink-0">
+                                    <i class="fas fa-book text-white" style="font-size: 9px;"></i>
+                                </div>
+                                <span class="text-gray-700 font-medium">Learning (50-79%)</span>
+                            </div>
+                            <div class="flex items-center gap-2 p-2 bg-white rounded-lg">
+                                <div class="w-5 h-5 rounded-full bg-red-500 flex items-center justify-center flex-shrink-0">
+                                    <i class="fas fa-exclamation-circle text-white" style="font-size: 9px;"></i>
+                                </div>
+                                <span class="text-gray-700 font-medium">Priority (<50%)</span>
+                            </div>
+                        </div>
+                        <div class="mt-3 pt-3 border-t border-gray-300">
+                            <div class="grid grid-cols-2 gap-2 text-xs">
+                                <div class="flex items-center gap-2">
+                                    <div class="w-8 h-1 bg-purple-600 rounded"></div>
+                                    <span class="text-gray-600">Goal Path</span>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <div class="w-8 h-1 bg-blue-500 rounded"></div>
+                                    <span class="text-gray-600">Milestone Link</span>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <div class="w-8 h-1 bg-green-500 rounded"></div>
+                                    <span class="text-gray-600">Mastered</span>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <div class="w-8 h-1 bg-red-500 rounded" style="border-top: 2px dashed #ef4444;"></div>
+                                    <span class="text-gray-600">Needs Focus</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mt-3 p-2 bg-blue-50 rounded-lg text-xs text-gray-700">
+                            <i class="fas fa-lightbulb text-yellow-500 mr-1"></i>
+                            <strong>Tip:</strong> Hover over nodes for details • Drag to reposition • Scroll to zoom • Click & drag background to pan
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Performance Trend Chart -->
+                <div class="glass-card rounded-2xl p-6">
+                    <h3 class="text-xl font-bold text-gray-800 mb-4">
+                        <i class="fas fa-chart-line mr-2 text-blue-500"></i>Performance Trend
+                        <span id="trend-indicator" class="text-sm font-normal ml-2"></span>
+                    </h3>
+                    <canvas id="performanceChart" height="100"></canvas>
+
+                    <!-- Trend Summary -->
+                    <div id="trend-summary" class="mt-4 p-3 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-200">
+                        <div class="flex items-center justify-between text-sm">
+                            <div class="flex items-center gap-4">
+                                <div>
+                                    <span class="text-gray-600">Trend:</span>
+                                    <span id="trend-direction" class="font-semibold ml-1">--</span>
+                                </div>
+                                <div>
+                                    <span class="text-gray-600">Rate:</span>
+                                    <span id="trend-rate" class="font-semibold ml-1">--</span>
+                                </div>
+                            </div>
+                            <div id="predictions-display" class="text-xs text-gray-600">
+                                <!-- Predictions will be inserted here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Learning Velocity -->
+                <div class="glass-card rounded-2xl p-6">
+                    <h3 class="text-xl font-bold text-gray-800 mb-4">
+                        <i class="fas fa-tachometer-alt mr-2 text-purple-500"></i>Learning Velocity
+                    </h3>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div class="text-center">
+                            <div class="text-2xl font-bold text-blue-600" id="concepts-per-week">--</div>
+                            <div class="text-sm text-gray-600">Concepts/Week</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-2xl font-bold text-green-600" id="practice-hours">--</div>
+                            <div class="text-sm text-gray-600">Practice Hours</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-2xl font-bold text-orange-600" id="completion-rate">--</div>
+                            <div class="text-sm text-gray-600">Completion Rate</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-2xl font-bold text-purple-600" id="retention-score">--</div>
+                            <div class="text-sm text-gray-600">Retention Score</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Enhanced Cognitive Profile (G-CDM) -->
+                <div class="glass-card rounded-2xl p-6">
+                    <h3 class="text-xl font-bold text-gray-800 mb-4">
+                        <i class="fas fa-brain mr-2 text-indigo-500"></i>Cognitive Profile (G-CDM)
+                        <span class="text-sm font-normal text-gray-600 ml-2">Graph-based Cognitive Diagnosis Model</span>
+                    </h3>
+
+                    <!-- Mastery Level Legend -->
+                    <div class="flex gap-4 mb-4 text-xs">
+                        <div class="flex items-center">
+                            <div class="w-3 h-3 rounded-full bg-green-500 mr-1"></div>
+                            <span>Mastered (≥80%)</span>
+                        </div>
+                        <div class="flex items-center">
+                            <div class="w-3 h-3 rounded-full bg-yellow-500 mr-1"></div>
+                            <span>Developing (50-79%)</span>
+                        </div>
+                        <div class="flex items-center">
+                            <div class="w-3 h-3 rounded-full bg-red-500 mr-1"></div>
+                            <span>Needs Focus (<50%)</span>
+                        </div>
+                    </div>
+
+                    <!-- Concept Cards with Enhanced Visualization -->
+                    <div class="space-y-3 max-h-96 overflow-y-auto">
+                        {% for concept in cognitive_profile %}
+                        <div class="concept-card gcdm-node rounded-lg p-4 bg-white shadow-sm {% if concept.mastery_level >= 80 %}border-green-500{% elif concept.mastery_level >= 50 %}border-yellow-500{% else %}border-red-500{% endif %}">
+                            <div class="flex justify-between items-start mb-2">
+                                <div class="flex-1">
+                                    <div class="flex items-center gap-2">
+                                        <span class="font-semibold text-gray-800">{{ concept.concept_name }}</span>
+                                        {% if concept.mastery_level >= 80 %}
+                                        <span class="px-2 py-0.5 bg-green-100 text-green-700 text-xs rounded-full">✓ Mastered</span>
+                                        {% elif concept.mastery_level >= 50 %}
+                                        <span class="px-2 py-0.5 bg-yellow-100 text-yellow-700 text-xs rounded-full">⚡ Developing</span>
+                                        {% else %}
+                                        <span class="px-2 py-0.5 bg-red-100 text-red-700 text-xs rounded-full">⚠ Focus</span>
+                                        {% endif %}
+                                    </div>
+                                    {% if concept.topic %}
+                                    <p class="text-xs text-gray-500 mt-1">📚 {{ concept.topic }}</p>
+                                    {% endif %}
+                                </div>
+                                <div class="text-right">
+                                    <div class="text-2xl font-bold {% if concept.mastery_level >= 80 %}text-green-600{% elif concept.mastery_level >= 50 %}text-yellow-600{% else %}text-red-600{% endif %}">
+                                        {{ concept.mastery_level }}%
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Progress Bar with Animation -->
+                            <div class="w-full bg-gray-200 rounded-full h-3 mb-2 overflow-hidden">
+                                <div class="h-3 rounded-full transition-all duration-1000 ease-out {% if concept.mastery_level >= 80 %}mastery-high{% elif concept.mastery_level >= 50 %}mastery-medium{% else %}mastery-low{% endif %}"
+                                     style="width: {{ concept.mastery_level }}%"></div>
+                            </div>
+
+                            {% if concept.recommendation %}
+                            <div class="bg-blue-50 border-l-2 border-blue-400 p-2 rounded text-xs text-gray-700">
+                                <i class="fas fa-lightbulb text-yellow-500 mr-1"></i>
+                                <strong>Recommendation:</strong> {{ concept.recommendation }}
+                            </div>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column - Grades & Recommendations -->
+            <div class="space-y-6">
+                <!-- Student Grades Section -->
+                <div class="glass-card rounded-2xl p-6">
+                    <h3 class="text-xl font-bold text-gray-800 mb-4">
+                        <i class="fas fa-graduation-cap mr-2 text-purple-500"></i>My Grades
+                    </h3>
+
+                    <div id="grades-container">
+                        <div class="text-sm text-gray-600 text-center py-4">Loading grades...</div>
+                    </div>
+
+                    <!-- Final Score -->
+                    <div class="mt-6 pt-4 border-t border-gray-200">
+                        <div class="flex justify-between items-center">
+                            <span class="text-lg font-bold text-gray-800">Final Score:</span>
+                            <span id="final-score" class="text-3xl font-bold text-blue-600">--</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- AI Insights -->
+                <div class="glass-card rounded-2xl p-6">
+                    <h3 class="text-xl font-bold text-gray-800 mb-4">
+                        <i class="fas fa-robot mr-2 text-pink-500"></i>AI Insights
+                    </h3>
+                    <div id="ai-insights-container" class="space-y-2">
+                        <div class="text-sm text-gray-600">Loading insights...</div>
+                    </div>
+                </div>
+
+                <!-- Recommendations -->
+                <div class="glass-card rounded-2xl p-6">
+                    <h3 class="text-xl font-bold text-gray-800 mb-4">
+                        <i class="fas fa-lightbulb mr-2 text-yellow-500"></i>Recommended Next
+                    </h3>
+                    <div id="recommendations-container" class="space-y-3">
+                        {% if recommendations %}
+                            {% for rec in recommendations %}
+                            <div class="p-4 rounded-lg border-l-4 {% if rec.priority == 'high' %}border-red-500 bg-red-50{% elif rec.priority == 'medium' %}border-yellow-500 bg-yellow-50{% else %}border-blue-500 bg-blue-50{% endif %}">
+                                <div class="flex justify-between items-start mb-2">
+                                    <div class="flex-1">
+                                        <h4 class="font-bold text-gray-800">{{ rec.title }}</h4>
+                                        <p class="text-sm text-gray-600">{{ rec.topic }}</p>
+                                    </div>
+                                    <span class="px-2 py-1 text-xs rounded-full {% if rec.priority == 'high' %}bg-red-200 text-red-800{% elif rec.priority == 'medium' %}bg-yellow-200 text-yellow-800{% else %}bg-blue-200 text-blue-800{% endif %}">
+                                        {{ rec.priority|upper }}
+                                    </span>
+                                </div>
+                                <p class="text-sm text-gray-700 mb-2">{{ rec.reason }}</p>
+                                <a href="/student/{{ student_id }}/learn/topics/{{ rec.topic }}"
+                                   class="inline-block px-3 py-1 bg-blue-600 text-white text-sm rounded hover:bg-blue-700 transition">
+                                    {{ rec.action }}
+                                </a>
+                            </div>
+                            {% endfor %}
+                        {% else %}
+                            <div class="text-sm text-gray-600 text-center p-4">
+                                <i class="fas fa-check-circle text-green-500 text-2xl mb-2"></i>
+                                <p>Great job! Complete the class pre-assessment to get personalized recommendations.</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Topic Progress -->
+                <div class="glass-card rounded-2xl p-6">
+                    <h3 class="text-xl font-bold text-gray-800 mb-4">
+                        <i class="fas fa-tasks mr-2 text-blue-500"></i>Topic Progress
+                    </h3>
+                    <div class="space-y-3" id="topic-progress-container">
+                        {% if topic_progress and topic_progress|length > 0 %}
+                            {% for topic in topic_progress %}
+                            <div class="border-b border-gray-200 pb-3">
+                                <div class="flex justify-between items-center mb-2">
+                                    <span class="font-semibold text-gray-800">{{ topic.topic_name }}</span>
+                                    <span class="px-2 py-1 text-xs rounded-full {% if topic.completed %}bg-green-100 text-green-800{% elif topic.in_progress %}bg-blue-100 text-blue-800{% else %}bg-gray-100 text-gray-800{% endif %}">
+                                        {% if topic.completed %}COMPLETED{% elif topic.in_progress %}IN PROGRESS{% else %}NOT STARTED{% endif %}
+                                    </span>
+                                </div>
+                                <div class="w-full bg-gray-200 rounded-full h-2 mb-2">
+                                    <div class="bg-blue-600 h-2 rounded-full" style="width: {{ topic.progress }}%"></div>
+                                </div>
+                                <div class="text-xs text-gray-600">
+                                    Score: {{ topic.score|round(1) }}% |
+                                    Videos: {{ topic.videos_watched }}/{{ topic.total_videos }} |
+                                    Readings: {{ topic.readings_completed }}/{{ topic.total_readings }}
+                                </div>
+                            </div>
+                            {% endfor %}
+                        {% else %}
+                            <div class="text-sm text-gray-600 text-center py-4">
+                                <i class="fas fa-info-circle text-blue-500 text-2xl mb-2"></i>
+                                <p>Start learning topics to see your progress here!</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const studentId = '{{ student_id }}';
+        let charts = {};
+
+        // Load student analytics
+        async function loadStudentAnalytics() {
+            try {
+                const response = await fetch(`/student/api/${studentId}/analytics`);
+                const data = await response.json();
+                
+                updateAnalytics(data);
+            } catch (error) {
+                console.error('Error loading analytics:', error);
+            }
+        }
+
+        // Update analytics display
+        function updateAnalytics(data) {
+            // Update learning velocity
+            document.getElementById('concepts-per-week').textContent = data.learning_velocity.concepts_per_week.toFixed(1);
+            document.getElementById('practice-hours').textContent = data.learning_velocity.practice_hours.toFixed(1);
+            document.getElementById('completion-rate').textContent = data.learning_velocity.completion_rate.toFixed(1) + '%';
+            document.getElementById('retention-score').textContent = data.learning_velocity.retention_score.toFixed(1) + '%';
+
+            // Update AI insights
+            const insightsContainer = document.getElementById('ai-insights-container');
+            insightsContainer.innerHTML = data.ai_insights.map(insight => 
+                `<div class="ai-insight text-sm mb-2">${insight}</div>`
+            ).join('');
+
+            // Update recommendations
+            const recommendationsContainer = document.getElementById('recommendations-container');
+            recommendationsContainer.innerHTML = data.next_recommendations.map(rec => `
+                <div class="recommendation-card">
+                    <div class="font-semibold mb-2">${rec.title}</div>
+                    <div class="text-sm mb-2">${rec.description}</div>
+                    ${rec.questions_count ? `<div class="text-xs text-purple-600 mb-2">📝 ${rec.questions_count} questions</div>` : ''}
+                    <div class="flex justify-between items-center text-xs">
+                        <span class="bg-white bg-opacity-30 px-2 py-1 rounded">${rec.difficulty}</span>
+                        <span class="font-semibold">+${rec.xp_reward} XP</span>
+                    </div>
+                </div>
+            `).join('');
+
+            // Update charts
+            updateCharts(data);
+        }
+
+        // Update charts
+        function updateCharts(data) {
+            // Performance Trend Chart with EMA + Linear Regression
+            const perfCtx = document.getElementById('performanceChart').getContext('2d');
+            if (charts.performance) charts.performance.destroy();
+
+            // Prepare datasets
+            const datasets = [
+                {
+                    label: 'Your Performance (Smoothed)',
+                    data: data.performance_trend.scores,
+                    borderColor: 'rgb(59, 130, 246)',
+                    backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                    borderWidth: 3,
+                    fill: true,
+                    tension: 0.4,
+                    pointRadius: 4,
+                    pointHoverRadius: 6
+                }
+            ];
+
+            // Add trend line if available
+            if (data.performance_trend.trend_line && data.performance_trend.trend_line.length > 0) {
+                datasets.push({
+                    label: 'Trend Line',
+                    data: data.performance_trend.trend_line,
+                    borderColor: 'rgb(239, 68, 68)',
+                    borderWidth: 2,
+                    borderDash: [5, 5],
+                    fill: false,
+                    pointRadius: 0,
+                    tension: 0
+                });
+            }
+
+            // Add predictions if available
+            if (data.performance_trend.predictions && data.performance_trend.predictions.length > 0) {
+                const allDates = [...data.performance_trend.dates];
+                const predictionDates = [];
+                const lastDate = new Date(allDates[allDates.length - 1] + ', 2024');
+
+                for (let i = 1; i <= data.performance_trend.predictions.length; i++) {
+                    const nextDate = new Date(lastDate);
+                    nextDate.setDate(lastDate.getDate() + i);
+                    predictionDates.push(nextDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }));
+                }
+
+                // Extend labels with prediction dates
+                const extendedLabels = [...allDates, ...predictionDates];
+
+                // Create prediction dataset (null for historical, values for future)
+                const predictionData = new Array(allDates.length).fill(null);
+                predictionData[allDates.length - 1] = data.performance_trend.scores[data.performance_trend.scores.length - 1];
+                predictionData.push(...data.performance_trend.predictions);
+
+                datasets.push({
+                    label: 'Predictions',
+                    data: predictionData,
+                    borderColor: 'rgb(16, 185, 129)',
+                    borderWidth: 2,
+                    borderDash: [10, 5],
+                    fill: false,
+                    pointRadius: 4,
+                    pointStyle: 'triangle',
+                    tension: 0.3
+                });
+
+                // Use extended labels
+                data.performance_trend.dates = extendedLabels;
+            }
+
+            charts.performance = new Chart(perfCtx, {
+                type: 'line',
+                data: {
+                    labels: data.performance_trend.dates,
+                    datasets: datasets
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top',
+                            labels: {
+                                usePointStyle: true,
+                                padding: 15,
+                                font: { size: 11 }
+                            }
+                        },
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false,
+                            callbacks: {
+                                afterLabel: function(context) {
+                                    if (context.datasetIndex === 2) {
+                                        return 'Predicted';
+                                    }
+                                    return '';
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100,
+                            title: {
+                                display: true,
+                                text: 'Score (%)'
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Date'
+                            }
+                        }
+                    },
+                    interaction: {
+                        mode: 'nearest',
+                        axis: 'x',
+                        intersect: false
+                    }
+                }
+            });
+
+            // Update trend summary
+            if (data.performance_trend.trend_direction) {
+                const trendDirection = data.performance_trend.trend_direction;
+                const slope = data.performance_trend.slope || 0;
+
+                // Update trend indicator
+                let trendIcon = '';
+                let trendColor = '';
+                let trendText = '';
+
+                if (trendDirection === 'improving') {
+                    trendIcon = '📈';
+                    trendColor = 'text-green-600';
+                    trendText = 'Improving';
+                } else if (trendDirection === 'declining') {
+                    trendIcon = '📉';
+                    trendColor = 'text-red-600';
+                    trendText = 'Declining';
+                } else {
+                    trendIcon = '📊';
+                    trendColor = 'text-blue-600';
+                    trendText = 'Stable';
+                }
+
+                document.getElementById('trend-indicator').innerHTML = `<span class="${trendColor}">${trendIcon} ${trendText}</span>`;
+                document.getElementById('trend-direction').innerHTML = `<span class="${trendColor}">${trendIcon} ${trendText}</span>`;
+                document.getElementById('trend-rate').innerHTML = `<span class="${trendColor}">${Math.abs(slope).toFixed(1)} pts/day</span>`;
+
+                // Update predictions display
+                if (data.performance_trend.predictions && data.performance_trend.predictions.length > 0) {
+                    const nextPrediction = data.performance_trend.predictions[0];
+                    document.getElementById('predictions-display').innerHTML = `
+                        <span class="text-gray-700">Next: <strong class="text-green-600">${nextPrediction}%</strong></span>
+                    `;
+                }
+            }
+
+            // Skill Radar Chart (Spider Web)
+            const skillCtx = document.getElementById('skillRadarChart').getContext('2d');
+            if (charts.skill) charts.skill.destroy();
+            
+            charts.skill = new Chart(skillCtx, {
+                type: 'radar',
+                data: {
+                    labels: Object.keys(data.skill_mastery),
+                    datasets: [{
+                        label: 'Skill Mastery Level',
+                        data: Object.values(data.skill_mastery),
+                        borderColor: 'rgb(34, 197, 94)',
+                        backgroundColor: 'rgba(34, 197, 94, 0.2)',
+                        borderWidth: 3,
+                        pointBackgroundColor: 'rgb(34, 197, 94)',
+                        pointBorderColor: '#fff',
+                        pointHoverBackgroundColor: '#fff',
+                        pointHoverBorderColor: 'rgb(34, 197, 94)',
+                        pointRadius: 5,
+                        pointHoverRadius: 7
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top',
+                            labels: {
+                                font: { size: 14, weight: 'bold' },
+                                color: '#1F2937'
+                            }
+                        }
+                    },
+                    scales: {
+                        r: {
+                            beginAtZero: true,
+                            max: 100,
+                            ticks: {
+                                stepSize: 20,
+                                font: { size: 12, weight: 'bold' },
+                                color: '#4B5563'
+                            },
+                            grid: {
+                                color: 'rgba(156, 163, 175, 0.3)'
+                            },
+                            pointLabels: {
+                                font: { size: 13, weight: 'bold' },
+                                color: '#1F2937'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Load grades from API
+        async function loadGrades() {
+            try {
+                const response = await fetch(`/student/${studentId}/learn/api/grades`);
+                const data = await response.json();
+
+                console.log('Grades data:', data); // Debug log
+
+                if (data.success && data.grades && data.grades.length > 0) {
+                    displayGrades(data.grades);
+                    // Use final_score from API if available
+                    if (data.final_score !== undefined) {
+                        document.getElementById('final-score').textContent = data.final_score.toFixed(1) + '%';
+                    } else {
+                        calculateFinalScore(data.grades);
+                    }
+                } else {
+                    document.getElementById('grades-container').innerHTML = `
+                        <div class="text-center py-4 text-gray-500">
+                            <i class="fas fa-clipboard-list text-2xl mb-2"></i>
+                            <p class="text-sm">No grades available yet. Complete some assessments to see your grades!</p>
+                        </div>
+                    `;
+                    document.getElementById('final-score').textContent = '--';
+                }
+            } catch (error) {
+                console.error('Error loading grades:', error);
+                document.getElementById('grades-container').innerHTML = `
+                    <div class="text-center py-4 text-red-500">
+                        <i class="fas fa-exclamation-triangle text-2xl mb-2"></i>
+                        <p class="text-sm">Error loading grades. Please refresh the page.</p>
+                    </div>
+                `;
+                document.getElementById('final-score').textContent = '--';
+            }
+        }
+
+        function displayGrades(grades) {
+            let html = '<div class="space-y-2">';
+
+            grades.forEach(grade => {
+                const percentage = Math.round(grade.percentage || 0);
+                const colorClass = percentage >= 80 ? 'text-green-600' : percentage >= 60 ? 'text-yellow-600' : 'text-red-600';
+                const bgClass = percentage >= 80 ? 'bg-green-50 border-green-200' : percentage >= 60 ? 'bg-yellow-50 border-yellow-200' : 'bg-red-50 border-red-200';
+
+                // Format date
+                let dateStr = 'N/A';
+                try {
+                    dateStr = new Date(grade.date).toLocaleDateString('en-US', {
+                        month: 'short',
+                        day: 'numeric',
+                        year: 'numeric'
+                    });
+                } catch (e) {
+                    console.error('Error formatting date:', e);
+                }
+
+                html += `
+                    <div class="border ${bgClass} rounded-lg p-3">
+                        <div class="flex justify-between items-center mb-1">
+                            <span class="font-semibold text-gray-800 text-sm">${grade.type.toUpperCase()}</span>
+                            <span class="font-bold ${colorClass}">${percentage}%</span>
+                        </div>
+                        <div class="text-xs text-gray-700 mb-1">${grade.topic_name || 'General'}</div>
+                        <div class="text-xs text-gray-500">
+                            ${dateStr}
+                        </div>
+                    </div>
+                `;
+            });
+
+            html += '</div>';
+            document.getElementById('grades-container').innerHTML = html;
+        }
+
+        function calculateFinalScore(grades) {
+            if (!grades || grades.length === 0) {
+                document.getElementById('final-score').textContent = '--';
+                return;
+            }
+
+            const totalPercentage = grades.reduce((sum, grade) => sum + (grade.percentage || 0), 0);
+            const avgPercentage = totalPercentage / grades.length;
+            document.getElementById('final-score').textContent = avgPercentage.toFixed(1);
+        }
+
+        // Load analytics on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            loadStudentAnalytics();
+            loadGrades();
+        });
+
+        // ==================== AI CHATBOT ====================
+
+        let chatbotActive = false;
+        let chatHistory = [];
+
+        function toggleChatbot() {
+            chatbotActive = !chatbotActive;
+            const popup = document.getElementById('chatbot-popup');
+            const fab = document.getElementById('chatbot-fab');
+
+            if (chatbotActive) {
+                popup.classList.add('active');
+                fab.classList.add('hidden');
+
+                // Add welcome message if first time
+                if (chatHistory.length === 0) {
+                    addBotMessage("Hi! I'm your AI learning assistant. How can I help you with your progress today?");
+                }
+            } else {
+                popup.classList.remove('active');
+                fab.classList.remove('hidden');
+            }
+        }
+
+        function addBotMessage(message) {
+            const messagesContainer = document.getElementById('chatbot-messages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'chatbot-message bot';
+            messageDiv.innerHTML = `
+                <div class="message-content">
+                    <div class="text-sm">${message}</div>
+                </div>
+            `;
+            messagesContainer.appendChild(messageDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            chatHistory.push({role: 'assistant', content: message});
+        }
+
+        function addUserMessage(message) {
+            const messagesContainer = document.getElementById('chatbot-messages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'chatbot-message user';
+            messageDiv.innerHTML = `
+                <div class="message-content">
+                    <div class="text-sm">${message}</div>
+                </div>
+            `;
+            messagesContainer.appendChild(messageDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            chatHistory.push({role: 'user', content: message});
+        }
+
+        async function sendChatMessage() {
+            const input = document.getElementById('chatbot-input');
+            const message = input.value.trim();
+
+            if (!message) return;
+
+            addUserMessage(message);
+            input.value = '';
+
+            // Show typing indicator
+            const typingDiv = document.createElement('div');
+            typingDiv.id = 'typing-indicator';
+            typingDiv.className = 'chatbot-message bot';
+            typingDiv.innerHTML = `
+                <div class="message-content">
+                    <div class="text-sm">Thinking...</div>
+                </div>
+            `;
+            document.getElementById('chatbot-messages').appendChild(typingDiv);
+
+            try {
+                const response = await fetch('/api/chat', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        student_id: '{{ student_id }}',
+                        message: message,
+                        context: 'progress_page'
+                    })
+                });
+
+                const data = await response.json();
+
+                // Remove typing indicator
+                document.getElementById('typing-indicator').remove();
+
+                if (data.response) {
+                    addBotMessage(data.response);
+                } else {
+                    addBotMessage("I'm sorry, I couldn't process that. Please try again.");
+                }
+            } catch (error) {
+                console.error('Chat error:', error);
+                document.getElementById('typing-indicator').remove();
+                addBotMessage("Sorry, I'm having trouble connecting. Please try again later.");
+            }
+        }
+
+        // Allow Enter key to send message
+        document.addEventListener('DOMContentLoaded', function() {
+            const chatInput = document.getElementById('chatbot-input');
+            if (chatInput) {
+                chatInput.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        sendChatMessage();
+                    }
+                });
+            }
+
+            // Initialize Mind Map
+            createMindMap();
+        });
+
+        // Create Interactive Mind Map using D3.js Force-Directed Graph
+        let mindMapSimulation;
+        let mindMapSvg;
+        let mindMapG;
+        let mindMapZoom;
+
+        function createMindMap() {
+            const container = document.getElementById('mindMap');
+            const width = container.offsetWidth;
+            const height = 600;
+
+            // Prepare nodes for force-directed graph with goals and milestones
+            const nodes = [
+                {id: "student", name: "{{ student.name if student else 'You' }}", type: "student", value: 100, group: 0,
+                 goal: "Master {{ total_topics }} Topics", progress: "{{ overall_score }}%"}
+            ];
+
+            const links = [];
+
+            // Add goal node
+            nodes.push({
+                id: "goal",
+                name: "Course Goal",
+                type: "goal",
+                value: {{ overall_score }},
+                group: 0,
+                fullName: "Complete All Topics with 80%+ Mastery",
+                target: "80%",
+                current: "{{ overall_score }}%"
+            });
+            links.push({source: "student", target: "goal", value: {{ overall_score }}, type: "goal"});
+
+            // Add topic nodes with detailed status
+            {% if topic_progress %}
+            {% for topic in topic_progress[:6] %}
+            const topicProgress{{ loop.index }} = {{ topic.progress if topic.progress else 0 }};
+            const topicStatus{{ loop.index }} = topicProgress{{ loop.index }} >= 80 ? "mastered" : topicProgress{{ loop.index }} >= 50 ? "learning" : "needs_focus";
+            nodes.push({
+                id: "topic_{{ loop.index }}",
+                name: "{{ topic.topic_name[:25] }}{% if topic.topic_name|length > 25 %}...{% endif %}",
+                type: "topic",
+                value: topicProgress{{ loop.index }},
+                group: 1,
+                fullName: "{{ topic.topic_name }}",
+                score: {{ topic.score if topic.score else 0 }},
+                status: topicStatus{{ loop.index }},
+                nextStep: topicProgress{{ loop.index }} < 100 ? "Complete remaining materials" : "Review and practice",
+                videosWatched: {{ topic.videos_watched if topic.videos_watched else 0 }},
+                readingsCompleted: {{ topic.readings_completed if topic.readings_completed else 0 }},
+                labCompleted: {{ 'true' if topic.lab_completed else 'false' }},
+                quizCompleted: {{ 'true' if topic.quiz_completed else 'false' }}
+            });
+            links.push({source: "goal", target: "topic_{{ loop.index }}", value: topicProgress{{ loop.index }}, type: "topic"});
+            {% endfor %}
+            {% endif %}
+
+            // Add milestone nodes for key achievements
+            const masteredCount = {{ mastered_concepts }};
+            const totalConcepts = {{ total_concepts }};
+            const milestoneProgress = (masteredCount / totalConcepts) * 100;
+
+            nodes.push({
+                id: "milestone_concepts",
+                name: "Concept Mastery",
+                type: "milestone",
+                value: milestoneProgress,
+                group: 3,
+                fullName: "Master All Core Concepts",
+                current: masteredCount,
+                target: totalConcepts,
+                percentage: Math.round(milestoneProgress)
+            });
+            links.push({source: "goal", target: "milestone_concepts", value: milestoneProgress, type: "milestone"});
+
+            // Add top priority skills (needs focus)
+            {% if cognitive_profile %}
+            let priorityCount = 0;
+            {% for concept in cognitive_profile %}
+            {% if concept.mastery_level < 60 and loop.index <= 5 %}
+            nodes.push({
+                id: "priority_{{ loop.index }}",
+                name: "{{ concept.concept_name[:20] }}{% if concept.concept_name|length > 20 %}...{% endif %}",
+                type: "priority",
+                value: {{ concept.mastery_level }},
+                group: 4,
+                fullName: "{{ concept.concept_name }}",
+                topic: "{{ concept.topic }}",
+                mastery: {{ concept.mastery_level }},
+                recommendation: "{{ concept.recommendation if concept.recommendation else 'Review materials and practice' }}"
+            });
+            links.push({source: "milestone_concepts", target: "priority_{{ loop.index }}", value: {{ concept.mastery_level }}, type: "priority"});
+            priorityCount++;
+            {% endif %}
+            {% endfor %}
+            {% endif %}
+
+            // Add mastered skills (achievements)
+            {% if cognitive_profile %}
+            let masteredSkillCount = 0;
+            {% for concept in cognitive_profile %}
+            {% if concept.mastery_level >= 80 and loop.index <= 5 %}
+            nodes.push({
+                id: "mastered_{{ loop.index }}",
+                name: "{{ concept.concept_name[:20] }}{% if concept.concept_name|length > 20 %}...{% endif %}",
+                type: "mastered",
+                value: {{ concept.mastery_level }},
+                group: 5,
+                fullName: "{{ concept.concept_name }}",
+                topic: "{{ concept.topic }}",
+                mastery: {{ concept.mastery_level }},
+                achievement: "Mastered!"
+            });
+            links.push({source: "milestone_concepts", target: "mastered_{{ loop.index }}", value: {{ concept.mastery_level }}, type: "mastered"});
+            masteredSkillCount++;
+            {% endif %}
+            {% endfor %}
+            {% endif %}
+
+            // Clear previous SVG
+            d3.select("#mindMap").selectAll("*").remove();
+
+            // Create SVG
+            mindMapSvg = d3.select("#mindMap")
+                .append("svg")
+                .attr("width", width)
+                .attr("height", height)
+                .style("cursor", "grab");
+
+            // Create container group
+            mindMapG = mindMapSvg.append("g");
+
+            // Create force simulation with custom positioning
+            mindMapSimulation = d3.forceSimulation(nodes)
+                .force("link", d3.forceLink(links).id(d => d.id).distance(d => {
+                    if (d.type === "goal") return 100;
+                    if (d.type === "topic") return 120;
+                    if (d.type === "milestone") return 90;
+                    return 80;
+                }))
+                .force("charge", d3.forceManyBody().strength(-500))
+                .force("center", d3.forceCenter(width / 2, height / 2))
+                .force("collision", d3.forceCollide().radius(d => {
+                    if (d.type === "student") return 40;
+                    if (d.type === "goal") return 38;
+                    if (d.type === "topic") return 32;
+                    if (d.type === "milestone") return 30;
+                    if (d.type === "priority") return 25;
+                    return 22;
+                }))
+                .force("x", d3.forceX(width / 2).strength(0.08))
+                .force("y", d3.forceY(height / 2).strength(0.08));
+
+            // Create links with different styles based on type
+            const link = mindMapG.append("g")
+                .selectAll("line")
+                .data(links)
+                .enter().append("line")
+                .attr("stroke-width", d => {
+                    if (d.type === "goal") return 3;
+                    if (d.type === "topic") return 2.5;
+                    if (d.type === "milestone") return 2;
+                    return 1.5;
+                })
+                .attr("stroke", d => {
+                    if (d.type === "goal") return "#8b5cf6";
+                    if (d.type === "milestone") return "#3b82f6";
+                    if (d.type === "priority") return "#ef4444";
+                    if (d.type === "mastered") return "#10b981";
+
+                    const value = d.value || 50;
+                    if (value >= 80) return "#10b981";
+                    if (value >= 50) return "#f59e0b";
+                    return "#ef4444";
+                })
+                .attr("stroke-opacity", d => {
+                    if (d.type === "goal" || d.type === "milestone") return 0.8;
+                    return 0.6;
+                })
+                .attr("stroke-dasharray", d => {
+                    if (d.type === "priority") return "5,5";
+                    return "0";
+                });
+
+            // Create node groups
+            const node = mindMapG.append("g")
+                .selectAll("g")
+                .data(nodes)
+                .enter().append("g")
+                .attr("cursor", "pointer")
+                .call(d3.drag()
+                    .on("start", dragstarted)
+                    .on("drag", dragged)
+                    .on("end", dragended));
+
+            // Add circles to nodes with type-specific styling
+            node.append("circle")
+                .attr("r", d => {
+                    if (d.type === "student") return 32;
+                    if (d.type === "goal") return 30;
+                    if (d.type === "topic") return 24;
+                    if (d.type === "milestone") return 22;
+                    if (d.type === "priority") return 18;
+                    return 16;
+                })
+                .attr("fill", d => {
+                    if (d.type === "student") return "#8b5cf6";
+                    if (d.type === "goal") return "#6366f1";
+                    if (d.type === "milestone") return "#3b82f6";
+                    if (d.type === "priority") return "#ef4444";
+                    if (d.type === "mastered") return "#10b981";
+
+                    const value = d.value || 50;
+                    if (value >= 80) return "#10b981";
+                    if (value >= 50) return "#f59e0b";
+                    return "#ef4444";
+                })
+                .attr("stroke", d => {
+                    if (d.type === "goal") return "#fbbf24";
+                    if (d.type === "milestone") return "#60a5fa";
+                    return "#fff";
+                })
+                .attr("stroke-width", d => {
+                    if (d.type === "goal" || d.type === "milestone") return 4;
+                    return 3;
+                })
+                .style("filter", "drop-shadow(0 3px 6px rgba(0,0,0,0.2))")
+                .on("mouseover", function(event, d) {
+                    d3.select(this)
+                        .transition()
+                        .duration(200)
+                        .attr("r", d => {
+                            if (d.type === "student") return 37;
+                            if (d.type === "goal") return 35;
+                            if (d.type === "topic") return 28;
+                            if (d.type === "milestone") return 26;
+                            if (d.type === "priority") return 22;
+                            return 20;
+                        })
+                        .style("filter", "drop-shadow(0 6px 16px rgba(0,0,0,0.4))");
+
+                    showTooltip(event, d);
+                })
+                .on("mouseout", function(event, d) {
+                    d3.select(this)
+                        .transition()
+                        .duration(200)
+                        .attr("r", d => {
+                            if (d.type === "student") return 32;
+                            if (d.type === "goal") return 30;
+                            if (d.type === "topic") return 24;
+                            if (d.type === "milestone") return 22;
+                            if (d.type === "priority") return 18;
+                            return 16;
+                        })
+                        .style("filter", "drop-shadow(0 3px 6px rgba(0,0,0,0.2))");
+
+                    hideTooltip();
+                });
+
+            // Add text labels
+            node.append("text")
+                .text(d => d.name)
+                .attr("text-anchor", "middle")
+                .attr("dy", d => d.type === "student" ? 42 : 32)
+                .style("font-size", d => d.type === "student" ? "13px" : "10px")
+                .style("font-weight", d => d.type === "student" ? "bold" : "500")
+                .style("fill", "#1f2937")
+                .style("pointer-events", "none")
+                .style("user-select", "none");
+
+            // Add icons to nodes based on type
+            node.append("text")
+                .attr("class", "fas")
+                .text(d => {
+                    if (d.type === "student") return "\uf007"; // user icon
+                    if (d.type === "goal") return "\uf091"; // trophy icon
+                    if (d.type === "topic") return "\uf02d"; // book icon
+                    if (d.type === "milestone") return "\uf024"; // flag icon
+                    if (d.type === "priority") return "\uf06a"; // exclamation circle
+                    if (d.type === "mastered") return "\uf00c"; // check icon
+                    return "\uf0eb"; // lightbulb icon
+                })
+                .attr("text-anchor", "middle")
+                .attr("dy", "0.35em")
+                .style("font-size", d => {
+                    if (d.type === "student" || d.type === "goal") return "16px";
+                    if (d.type === "topic" || d.type === "milestone") return "13px";
+                    return "10px";
+                })
+                .style("fill", "#fff")
+                .style("pointer-events", "none");
+
+            // Update positions on simulation tick
+            mindMapSimulation.on("tick", () => {
+                // Keep nodes within bounds
+                nodes.forEach(d => {
+                    const radius = d.type === "student" ? 28 : d.type === "topic" ? 20 : 16;
+                    d.x = Math.max(radius + 10, Math.min(width - radius - 10, d.x));
+                    d.y = Math.max(radius + 10, Math.min(height - radius - 10, d.y));
+                });
+
+                link
+                    .attr("x1", d => d.source.x)
+                    .attr("y1", d => d.source.y)
+                    .attr("x2", d => d.target.x)
+                    .attr("y2", d => d.target.y);
+
+                node.attr("transform", d => `translate(${d.x},${d.y})`);
+            });
+
+            // Add zoom behavior
+            mindMapZoom = d3.zoom()
+                .scaleExtent([0.4, 2.5])
+                .on("zoom", (event) => {
+                    mindMapG.attr("transform", event.transform);
+                });
+
+            mindMapSvg.call(mindMapZoom);
+
+            // Drag functions
+            function dragstarted(event, d) {
+                if (!event.active) mindMapSimulation.alphaTarget(0.3).restart();
+                d.fx = d.x;
+                d.fy = d.y;
+                mindMapSvg.style("cursor", "grabbing");
+            }
+
+            function dragged(event, d) {
+                d.fx = event.x;
+                d.fy = event.y;
+            }
+
+            function dragended(event, d) {
+                if (!event.active) mindMapSimulation.alphaTarget(0);
+                d.fx = null;
+                d.fy = null;
+                mindMapSvg.style("cursor", "grab");
+            }
+
+            // Enhanced tooltip with goal-oriented information
+            function showTooltip(event, d) {
+                const tooltip = d3.select("body").append("div")
+                    .attr("class", "mind-map-tooltip")
+                    .style("position", "absolute")
+                    .style("background", "rgba(0, 0, 0, 0.95)")
+                    .style("color", "white")
+                    .style("padding", "14px 18px")
+                    .style("border-radius", "12px")
+                    .style("font-size", "13px")
+                    .style("pointer-events", "none")
+                    .style("z-index", "10000")
+                    .style("box-shadow", "0 8px 24px rgba(0,0,0,0.5)")
+                    .style("backdrop-filter", "blur(12px)")
+                    .style("max-width", "320px");
+
+                let content = `<div style="font-weight: 700; margin-bottom: 8px; font-size: 14px; border-bottom: 2px solid rgba(255,255,255,0.2); padding-bottom: 6px;">${d.fullName || d.name}</div>`;
+
+                if (d.type === "student") {
+                    content += `<div style="color: #c4b5fd; font-size: 12px; margin-bottom: 6px;">🎓 Your Learning Journey</div>`;
+                    content += `<div style="margin-top: 6px; font-size: 12px;">📊 Overall Progress: <span style="color: #10b981; font-weight: 600;">${d.progress}</span></div>`;
+                    content += `<div style="margin-top: 4px; font-size: 12px;">🎯 Goal: ${d.goal}</div>`;
+
+                } else if (d.type === "goal") {
+                    const color = d.value >= 80 ? '#10b981' : d.value >= 50 ? '#f59e0b' : '#ef4444';
+                    content += `<div style="color: #fbbf24; font-size: 12px; margin-bottom: 6px;">🏆 Course Completion Goal</div>`;
+                    content += `<div style="margin-top: 6px;">Current: <span style="color: ${color}; font-weight: 600;">${d.current}</span></div>`;
+                    content += `<div style="margin-top: 4px;">Target: <span style="color: #10b981; font-weight: 600;">${d.target}</span></div>`;
+                    const remaining = 80 - d.value;
+                    if (remaining > 0) {
+                        content += `<div style="margin-top: 6px; padding: 6px; background: rgba(239,68,68,0.2); border-radius: 6px; font-size: 11px;">📈 ${remaining.toFixed(1)}% to reach goal</div>`;
+                    } else {
+                        content += `<div style="margin-top: 6px; padding: 6px; background: rgba(16,185,129,0.2); border-radius: 6px; font-size: 11px;">✅ Goal achieved!</div>`;
+                    }
+
+                } else if (d.type === "topic") {
+                    const color = d.value >= 80 ? '#10b981' : d.value >= 50 ? '#f59e0b' : '#ef4444';
+                    const statusIcon = d.value >= 80 ? '✅' : d.value >= 50 ? '📚' : '🎯';
+                    content += `<div style="margin-top: 4px;">${statusIcon} Progress: <span style="color: ${color}; font-weight: 600;">${d.value}%</span></div>`;
+                    if (d.score) {
+                        content += `<div style="margin-top: 4px; font-size: 12px;">📊 Score: ${d.score}%</div>`;
+                    }
+                    content += `<div style="margin-top: 8px; padding-top: 8px; border-top: 1px solid rgba(255,255,255,0.1); font-size: 11px;">`;
+                    content += `<div>📹 Videos: ${d.videosWatched || 0}</div>`;
+                    content += `<div>📖 Readings: ${d.readingsCompleted || 0}</div>`;
+                    content += `<div>🧪 Lab: ${d.labCompleted ? '✅' : '⏳'}</div>`;
+                    content += `<div>❓ Quiz: ${d.quizCompleted ? '✅' : '⏳'}</div>`;
+                    content += `</div>`;
+                    if (d.nextStep) {
+                        content += `<div style="margin-top: 8px; padding: 6px; background: rgba(59,130,246,0.2); border-radius: 6px; font-size: 11px;">💡 Next: ${d.nextStep}</div>`;
+                    }
+
+                } else if (d.type === "milestone") {
+                    const color = d.value >= 80 ? '#10b981' : d.value >= 50 ? '#f59e0b' : '#ef4444';
+                    content += `<div style="color: #60a5fa; font-size: 12px; margin-bottom: 6px;">🚩 Learning Milestone</div>`;
+                    content += `<div style="margin-top: 6px;">Progress: <span style="color: ${color}; font-weight: 600;">${d.percentage}%</span></div>`;
+                    content += `<div style="margin-top: 4px; font-size: 12px;">${d.current} / ${d.target} concepts mastered</div>`;
+                    const remaining = d.target - d.current;
+                    if (remaining > 0) {
+                        content += `<div style="margin-top: 6px; padding: 6px; background: rgba(245,158,11,0.2); border-radius: 6px; font-size: 11px;">🎯 ${remaining} more to master</div>`;
+                    }
+
+                } else if (d.type === "priority") {
+                    content += `<div style="color: #fca5a5; font-size: 12px; margin-bottom: 6px;">⚠️ Needs Focus</div>`;
+                    content += `<div style="margin-top: 6px;">Mastery: <span style="color: #ef4444; font-weight: 600;">${d.mastery}%</span></div>`;
+                    content += `<div style="margin-top: 4px; font-size: 11px; color: #d1d5db;">📚 ${d.topic}</div>`;
+                    if (d.recommendation) {
+                        content += `<div style="margin-top: 8px; padding: 6px; background: rgba(239,68,68,0.2); border-radius: 6px; font-size: 11px;">💡 ${d.recommendation}</div>`;
+                    }
+
+                } else if (d.type === "mastered") {
+                    content += `<div style="color: #86efac; font-size: 12px; margin-bottom: 6px;">✨ ${d.achievement}</div>`;
+                    content += `<div style="margin-top: 6px;">Mastery: <span style="color: #10b981; font-weight: 600;">${d.mastery}%</span></div>`;
+                    content += `<div style="margin-top: 4px; font-size: 11px; color: #d1d5db;">📚 ${d.topic}</div>`;
+                    content += `<div style="margin-top: 8px; padding: 6px; background: rgba(16,185,129,0.2); border-radius: 6px; font-size: 11px;">🎉 Keep up the great work!</div>`;
+                }
+
+                tooltip.html(content)
+                    .style("left", (event.pageX + 15) + "px")
+                    .style("top", (event.pageY - 15) + "px");
+            }
+
+            function hideTooltip() {
+                d3.selectAll(".mind-map-tooltip").remove();
+            }
+        }
+
+        // Reset zoom function
+        function resetMindMapZoom() {
+            if (mindMapSvg && mindMapZoom) {
+                mindMapSvg.transition()
+                    .duration(750)
+                    .call(mindMapZoom.transform, d3.zoomIdentity);
+            }
+        }
+
+        // Center view function
+        function centerMindMap() {
+            if (mindMapSimulation) {
+                const container = document.getElementById('mindMap');
+                const width = container.offsetWidth;
+                const height = 600;
+
+                mindMapSimulation
+                    .force("center", d3.forceCenter(width / 2, height / 2))
+                    .alpha(0.5)
+                    .restart();
+            }
+        }
+    </script>
+
+    <!-- AI Chatbot FAB -->
+    <div id="chatbot-fab" class="chatbot-fab" onclick="toggleChatbot()">
+        <i class="fas fa-robot text-2xl"></i>
+    </div>
+
+    <!-- AI Chatbot Popup -->
+    <div id="chatbot-popup" class="chatbot-popup">
+        <div class="chatbot-header">
+            <div class="flex items-center gap-2">
+                <i class="fas fa-robot text-xl"></i>
+                <div>
+                    <div class="font-bold">AI Learning Assistant</div>
+                    <div class="text-xs opacity-80">Always here to help</div>
+                </div>
+            </div>
+            <button onclick="toggleChatbot()" class="text-white hover:bg-white hover:bg-opacity-20 rounded-full p-2 transition">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+
+        <div id="chatbot-messages" class="chatbot-messages">
+            <!-- Messages will be added here dynamically -->
+        </div>
+
+        <div class="chatbot-input-area">
+            <input type="text"
+                   id="chatbot-input"
+                   placeholder="Ask me anything about your progress..."
+                   class="flex-1 px-4 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-purple-500">
+            <button onclick="sendChatMessage()"
+                    class="px-4 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-full hover:shadow-lg transition">
+                <i class="fas fa-paper-plane"></i>
+            </button>
+        </div>
+    </div>
+</body>
+</html>
+

@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teacher Sign In - BIT Tutor</title>
+    
+    <!-- Tailwind CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/nexus.css') }}" rel="stylesheet">
+</head>
+<body class="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-900 via-purple-900 to-indigo-900">
+    
+    <!-- Sign In Card -->
+    <div class="glass-card max-w-md w-full mx-4 p-8">
+        <!-- Logo/Header -->
+        <div class="text-center mb-8">
+            <div class="text-5xl mb-4">👨‍🏫</div>
+            <h1 class="text-3xl font-bold text-gray-800 mb-2">Teacher Portal</h1>
+            <p class="text-gray-600">BIT Tutor Educational Platform</p>
+        </div>
+        
+        <!-- Error Message -->
+        {% if error %}
+        <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+            <i class="fas fa-exclamation-circle mr-2"></i>{{ error }}
+        </div>
+        {% endif %}
+        
+        <!-- Sign In Form -->
+        <form method="POST" action="{{ url_for('teacher.signin') }}">
+            <div class="mb-6">
+                <label for="username" class="block text-gray-700 font-semibold mb-2">
+                    <i class="fas fa-user mr-2"></i>Username
+                </label>
+                <input type="text" 
+                       id="username" 
+                       name="username" 
+                       class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                       placeholder="Enter username"
+                       required>
+            </div>
+            
+            <div class="mb-6">
+                <label for="password" class="block text-gray-700 font-semibold mb-2">
+                    <i class="fas fa-lock mr-2"></i>Password
+                </label>
+                <input type="password" 
+                       id="password" 
+                       name="password" 
+                       class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                       placeholder="Enter password"
+                       required>
+            </div>
+            
+            <button type="submit" 
+                    class="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white font-bold py-3 px-6 rounded-lg hover:from-blue-700 hover:to-purple-700 transition duration-300 transform hover:scale-105">
+                <i class="fas fa-sign-in-alt mr-2"></i>Sign In
+            </button>
+        </form>
+        
+        <!-- Demo Credentials -->
+        <div class="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
+            <p class="text-sm text-blue-800 font-semibold mb-2">
+                <i class="fas fa-info-circle mr-2"></i>Demo Credentials
+            </p>
+            <p class="text-sm text-blue-700">
+                Username: <code class="bg-blue-100 px-2 py-1 rounded">teacher</code><br>
+                Password: <code class="bg-blue-100 px-2 py-1 rounded">teacher123</code>
+            </p>
+        </div>
+        
+        <!-- Back to Home -->
+        <div class="mt-6 text-center">
+            <a href="{{ url_for('nexus_home') }}" class="text-blue-600 hover:text-blue-800 text-sm">
+                <i class="fas fa-arrow-left mr-2"></i>Back to Student Portal
+            </a>
+        </div>
+    </div>
+    
+</body>
+</html>
+

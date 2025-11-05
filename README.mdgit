@@ -1,0 +1,1 @@
+# KTCD_AUG initgit add README.mdgit commit -m first commitgit branch -M maingit remote add origin https://github.com/mosaid97/KTCD_AUG.gitgit push -u origin main

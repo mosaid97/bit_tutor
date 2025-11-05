@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Browse Topics - BIT Tutor</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+        .topic-card {
+            transition: all 0.3s ease;
+            border-left: 4px solid transparent;
+            cursor: pointer;
+        }
+        .topic-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+            border-left-color: #4f46e5;
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-900 min-h-screen">
+    <!-- Header -->
+    <nav class="bg-white/10 backdrop-blur-md border-b border-white/20 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center space-x-4">
+                    <h1 class="text-2xl font-bold text-white">
+                        <i class="fas fa-graduation-cap mr-2"></i>BIT Tutor
+                    </h1>
+                    <span class="text-white/70">|</span>
+                    <span class="text-white/90">Learning Topics</span>
+                </div>
+                <div class="flex items-center space-x-3">
+                    <a href="/student/{{ student_id }}/dashboard"
+                       class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition">
+                        <i class="fas fa-home mr-2"></i>Dashboard
+                    </a>
+                    <a href="/student/{{ student_id }}/progress"
+                       class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition">
+                        <i class="fas fa-chart-line mr-2"></i>My Progress
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Statistics -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            <div class="glass-card rounded-xl p-6 shadow-lg">
+                <div class="flex items-center">
+                    <div class="p-3 bg-blue-100 rounded-lg">
+                        <i class="fas fa-book text-blue-600 text-2xl"></i>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-600">Total Topics</p>
+                        <p class="text-2xl font-bold text-gray-900">{{ stats.total_topics }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="glass-card rounded-xl p-6 shadow-lg">
+                <div class="flex items-center">
+                    <div class="p-3 bg-green-100 rounded-lg">
+                        <i class="fas fa-lightbulb text-green-600 text-2xl"></i>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-600">Total Concepts</p>
+                        <p class="text-2xl font-bold text-gray-900">{{ stats.total_concepts }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="glass-card rounded-xl p-6 shadow-lg">
+                <div class="flex items-center">
+                    <div class="p-3 bg-purple-100 rounded-lg">
+                        <i class="fas fa-clipboard-check text-purple-600 text-2xl"></i>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-600">Total Quizzes</p>
+                        <p class="text-2xl font-bold text-gray-900">{{ stats.total_quizzes }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="glass-card rounded-xl p-6 shadow-lg">
+                <div class="flex items-center">
+                    <div class="p-3 bg-orange-100 rounded-lg">
+                        <i class="fas fa-flask text-orange-600 text-2xl"></i>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-600">Total Labs</p>
+                        <p class="text-2xl font-bold text-gray-900">{{ stats.total_labs }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Search and Filter -->
+        <div class="glass-card rounded-xl p-6 shadow-lg mb-8">
+            <div class="flex items-center space-x-4">
+                <div class="flex-1">
+                    <input type="text" 
+                           id="searchInput"
+                           placeholder="Search topics..." 
+                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+                </div>
+                <select id="filterSelect" class="px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500">
+                    <option value="all">All Topics</option>
+                    <option value="enrolled">Enrolled</option>
+                    <option value="not-enrolled">Not Enrolled</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Topics Grid -->
+        <div id="topicsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {% for topic in topics %}
+            <div class="topic-card glass-card rounded-xl p-6 shadow-lg" 
+                 data-enrolled="{{ 'true' if topic.name in enrolled_topics else 'false' }}"
+                 data-topic-name="{{ topic.name|lower }}">
+                <div class="flex items-start justify-between mb-4">
+                    <div class="p-3 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-lg">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+                        </svg>
+                    </div>
+                    {% if topic.name in enrolled_topics %}
+                    <span class="px-3 py-1 bg-green-100 text-green-800 text-xs font-semibold rounded-full">
+                        ✓ Enrolled
+                    </span>
+                    {% else %}
+                    <span class="px-3 py-1 bg-gray-100 text-gray-600 text-xs font-semibold rounded-full">
+                        Available
+                    </span>
+                    {% endif %}
+                </div>
+
+                <h3 class="text-lg font-bold text-gray-900 mb-2">{{ topic.name }}</h3>
+                <p class="text-sm text-gray-600 mb-4 line-clamp-2">
+                    {{ topic.description if topic.description else 'Explore the fundamental concepts and practical applications' }}
+                </p>
+
+                <!-- Stats -->
+                <div class="flex items-center space-x-4 mb-4 text-xs text-gray-500">
+                    <span><i class="fas fa-lightbulb mr-1"></i>{{ topic.concept_count }} concepts</span>
+                    <span><i class="fas fa-clipboard-check mr-1"></i>{{ topic.quiz_count }} quiz</span>
+                    <span><i class="fas fa-flask mr-1"></i>{{ topic.lab_count }} labs</span>
+                </div>
+
+                <div class="flex items-center justify-between pt-4 border-t border-gray-200">
+                    {% if topic.name not in enrolled_topics %}
+                    <a href="/student/{{ student_id }}/learn/topics/{{ topic.name }}"
+                       class="flex-1 px-4 py-2 bg-indigo-600 text-white text-sm rounded-lg hover:bg-indigo-700 transition text-center">
+                        <i class="fas fa-play mr-2"></i>Start Learning
+                    </a>
+                    {% else %}
+                    <a href="/student/{{ student_id }}/learn/topics/{{ topic.name }}/materials"
+                       class="flex-1 px-4 py-2 bg-green-600 text-white text-sm rounded-lg hover:bg-green-700 transition text-center">
+                        <i class="fas fa-arrow-right mr-2"></i>Continue Learning
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        {% if not topics %}
+        <div class="glass-card rounded-xl p-12 shadow-lg text-center">
+            <svg class="w-16 h-16 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+            </svg>
+            <h3 class="text-xl font-bold text-gray-900 mb-2">No Topics Available</h3>
+            <p class="text-gray-600">Topics will appear here once they are added to the system.</p>
+        </div>
+        {% endif %}
+    </div>
+
+    <script>
+        // Search functionality
+        document.getElementById('searchInput').addEventListener('input', filterTopics);
+        document.getElementById('filterSelect').addEventListener('change', filterTopics);
+
+        function filterTopics() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const filter = document.getElementById('filterSelect').value;
+            const cards = document.querySelectorAll('.topic-card');
+
+            cards.forEach(card => {
+                const topicName = card.getAttribute('data-topic-name');
+                const isEnrolled = card.getAttribute('data-enrolled') === 'true';
+
+                let matchesSearch = topicName.includes(searchTerm);
+                let matchesFilter = filter === 'all' ||
+                                  (filter === 'enrolled' && isEnrolled) ||
+                                  (filter === 'not-enrolled' && !isEnrolled);
+
+                if (matchesSearch && matchesFilter) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        }
+    </script>
+
+    <!-- Include Chatbot Widget -->
+    {% include 'student/chatbot_widget.html' %}
+</body>
+</html>
+

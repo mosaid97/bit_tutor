@@ -13,8 +13,25 @@ Main Components:
 """
 
 from .models.llm_content_generator import LLM_Content_Generator
-from .models.rl_recommender_agent import RL_Recommender_Agent
-from .services.recommendation_service import RecommendationService
+
+# Try to import torch-dependent models
+try:
+    from .models.rl_recommender_agent import RL_Recommender_Agent
+    from .services.recommendation_service import RecommendationService
+    _TORCH_AVAILABLE = True
+except ImportError as e:
+    print(f"Warning: torch-dependent recommendation models not available: {e}")
+    print("Creating mock implementations...")
+    _TORCH_AVAILABLE = False
+
+    # Create mock classes
+    class RL_Recommender_Agent:
+        def __init__(self, *args, **kwargs):
+            raise ImportError("RL_Recommender_Agent requires torch. Please install: pip install torch")
+
+    class RecommendationService:
+        def __init__(self, *args, **kwargs):
+            raise ImportError("RecommendationService requires torch. Please install: pip install torch")
 
 # Re-export main classes for backward compatibility
 __all__ = [

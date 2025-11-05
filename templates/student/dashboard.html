@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ student.name }} - Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 50%, #8b5cf6 100%);
+            min-height: 100vh;
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .topic-card {
+            transition: all 0.3s ease;
+        }
+        .topic-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+        }
+        /* Chatbot Styles */
+        .chatbot-container {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 380px;
+            max-height: 600px;
+            z-index: 1000;
+            transition: all 0.3s ease;
+        }
+        .chatbot-minimized {
+            max-height: 60px;
+        }
+        .chat-messages {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .chat-message {
+            animation: slideIn 0.3s ease;
+        }
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        /* Fixed button position */
+        .topic-card-content {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            min-height: 280px;
+        }
+        .topic-card-body {
+            flex: 1;
+        }
+        .topic-card-footer {
+            margin-top: auto;
+            padding-top: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="bg-white shadow-lg sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center space-x-4">
+                    <i class="fas fa-graduation-cap text-purple-600 text-2xl mr-3"></i>
+                    <div>
+                        <span class="text-xl font-bold text-gray-800">BIT Tutor</span>
+                        {% if class_info %}
+                        <div class="text-xs text-gray-600">
+                            <i class="fas fa-book mr-1"></i>{{ class_info.name }}
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <a href="{{ url_for('student_portal.select_class', student_id=student.student_id) }}"
+                       class="px-3 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition text-sm transform hover:scale-105">
+                        <i class="fas fa-exchange-alt mr-2"></i>
+                        Change Class
+                    </a>
+                    <a href="/student/{{ student.student_id }}/progress"
+                       class="px-4 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-lg hover:shadow-lg transition transform hover:scale-105">
+                        <i class="fas fa-brain mr-2"></i>
+                        My Progress
+                    </a>
+                    <a href="/student/{{ student.student_id }}/learn/topics"
+                       class="px-4 py-2 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-lg hover:shadow-lg transition transform hover:scale-105">
+                        <i class="fas fa-book mr-2"></i>
+                        Browse Topics
+                    </a>
+                    <span class="text-gray-700">
+                        <i class="fas fa-user-circle mr-2"></i>
+                        {{ student.name }}
+                    </span>
+                    <a href="{{ url_for('student_portal.logout') }}"
+                       class="text-red-600 hover:text-red-700 transition">
+                        <i class="fas fa-sign-out-alt mr-1"></i>
+                        Logout
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Breadcrumb -->
+    <div class="bg-gray-50 border-b border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
+            <div class="flex items-center text-sm text-gray-600">
+                <i class="fas fa-home mr-2 text-purple-600"></i>
+                <span class="font-semibold text-purple-600">Dashboard</span>
+                <span class="mx-2">•</span>
+                <span class="text-gray-500">{{ student.name }}</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Welcome Section -->
+        <div class="glass-card rounded-xl p-6 mb-8">
+            <h1 class="text-3xl font-bold text-gray-800 mb-2">
+                Welcome back, {{ student.name }}! 👋
+            </h1>
+            <p class="text-gray-600">
+                <i class="fas fa-book-open mr-2"></i>
+                {{ student.class_name or 'Your Learning Journey' }}
+            </p>
+        </div>
+
+        <!-- Statistics -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            <div class="glass-card rounded-xl p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-gray-600 mb-1">Topics</p>
+                        <p class="text-3xl font-bold text-blue-600">{{ stats.total_topics }}</p>
+                    </div>
+                    <div class="p-3 bg-blue-100 rounded-lg">
+                        <i class="fas fa-book text-blue-600 text-2xl"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="glass-card rounded-xl p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-gray-600 mb-1">Concepts</p>
+                        <p class="text-3xl font-bold text-green-600">{{ stats.total_concepts }}</p>
+                    </div>
+                    <div class="p-3 bg-green-100 rounded-lg">
+                        <i class="fas fa-lightbulb text-green-600 text-2xl"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="glass-card rounded-xl p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-gray-600 mb-1">Quizzes</p>
+                        <p class="text-3xl font-bold text-purple-600">{{ stats.total_quizzes }}</p>
+                    </div>
+                    <div class="p-3 bg-purple-100 rounded-lg">
+                        <i class="fas fa-clipboard-check text-purple-600 text-2xl"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="glass-card rounded-xl p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-gray-600 mb-1">Labs</p>
+                        <p class="text-3xl font-bold text-orange-600">{{ stats.total_labs }}</p>
+                    </div>
+                    <div class="p-3 bg-orange-100 rounded-lg">
+                        <i class="fas fa-flask text-orange-600 text-2xl"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Topics Section -->
+        <div class="glass-card rounded-xl p-6">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold text-gray-800">
+                    <i class="fas fa-list mr-2"></i>
+                    Your Topics
+                </h2>
+                <div class="text-sm text-gray-600">
+                    {{ topics|length }} topic{{ 's' if topics|length != 1 else '' }} available
+                </div>
+            </div>
+
+            {% if topics %}
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {% for topic in topics %}
+                <div class="topic-card bg-white rounded-lg shadow-md p-6 border-l-4 border-blue-500">
+                    <div class="topic-card-content">
+                        <div class="topic-card-body">
+                            <div class="flex justify-between items-start mb-3">
+                                <h3 class="text-lg font-bold text-gray-800 flex-1">
+                                    {{ topic.name }}
+                                </h3>
+                                <span class="bg-blue-100 text-blue-800 text-xs font-semibold px-2 py-1 rounded">
+                                    #{{ topic.order }}
+                                </span>
+                            </div>
+
+                            <p class="text-sm text-gray-600 mb-4 line-clamp-2">
+                                {{ topic.description or 'Explore this topic to learn more' }}
+                            </p>
+
+                            <!-- Stats -->
+                            <div class="flex items-center space-x-4 mb-4 text-xs text-gray-500">
+                                <span>
+                                    <i class="fas fa-lightbulb mr-1"></i>
+                                    {{ topic.concept_count }} concepts
+                                </span>
+                                <span>
+                                    <i class="fas fa-clipboard-check mr-1"></i>
+                                    {{ topic.quiz_count }} quiz
+                                </span>
+                                <span>
+                                    <i class="fas fa-flask mr-1"></i>
+                                    {{ topic.lab_count }} labs
+                                </span>
+                            </div>
+
+                            {% if topic.estimated_hours %}
+                            <div class="text-xs text-gray-500 mb-4">
+                                <i class="fas fa-clock mr-1"></i>
+                                ~{{ topic.estimated_hours }} hours
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="topic-card-footer">
+                            <a href="/student/{{ student.student_id }}/learn/topics/{{ topic.name }}"
+                               class="block w-full text-center bg-gradient-to-r from-blue-500 to-purple-600 text-white font-semibold py-2 px-4 rounded-lg hover:shadow-lg transition duration-300">
+                                <i class="fas fa-play mr-2"></i>
+                                Start Learning
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="text-center py-12">
+                <i class="fas fa-inbox text-gray-300 text-6xl mb-4"></i>
+                <p class="text-gray-500 text-lg">No topics available yet</p>
+                <p class="text-gray-400 text-sm">Check back later for new content</p>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <a href="/student/{{ student.student_id }}/browse-topics"
+               class="glass-card rounded-xl p-6 hover:shadow-lg transition duration-300 cursor-pointer">
+                <div class="flex items-center">
+                    <div class="p-3 bg-blue-100 rounded-lg mr-4">
+                        <i class="fas fa-book-reader text-blue-600 text-2xl"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold text-gray-800">Browse Topics</h3>
+                        <p class="text-sm text-gray-600">Explore all available topics</p>
+                    </div>
+                </div>
+            </a>
+
+            <a href="/student/{{ student.student_id }}/progress"
+               class="glass-card rounded-xl p-6 hover:shadow-lg transition duration-300 cursor-pointer">
+                <div class="flex items-center">
+                    <div class="p-3 bg-green-100 rounded-lg mr-4">
+                        <i class="fas fa-chart-line text-green-600 text-2xl"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold text-gray-800">My Progress</h3>
+                        <p class="text-sm text-gray-600">Track your achievements</p>
+                    </div>
+                </div>
+            </a>
+
+            <a href="/student/{{ student.student_id }}/ai-tutor"
+               class="glass-card rounded-xl p-6 hover:shadow-lg transition duration-300 cursor-pointer">
+                <div class="flex items-center">
+                    <div class="p-3 bg-purple-100 rounded-lg mr-4">
+                        <i class="fas fa-robot text-purple-600 text-2xl"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold text-gray-800">AI Tutor</h3>
+                        <p class="text-sm text-gray-600">Get personalized help</p>
+                    </div>
+                </div>
+            </a>
+        </div>
+    </div>
+
+    <!-- Global BIT Tutor AI Chatbot -->
+    <div id="chatbot" class="chatbot-container glass-card rounded-2xl shadow-2xl">
+        <div class="bg-gradient-to-r from-purple-600 to-indigo-600 text-white p-4 rounded-t-2xl cursor-pointer" onclick="toggleChatbot()">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center">
+                    <i class="fas fa-robot text-2xl mr-3"></i>
+                    <div>
+                        <h3 class="font-bold">BIT Tutor AI</h3>
+                        <p class="text-xs opacity-90">Always here to help!</p>
+                    </div>
+                </div>
+                <i class="fas fa-chevron-down" id="chatbot-toggle-icon"></i>
+            </div>
+        </div>
+        <div id="chatbot-body" class="bg-white p-4 rounded-b-2xl">
+            <div class="chat-messages mb-4" id="chat-messages">
+                <div class="chat-message mb-3">
+                    <div class="flex items-start">
+                        <div class="w-8 h-8 bg-purple-600 rounded-full flex items-center justify-center mr-2 flex-shrink-0">
+                            <i class="fas fa-robot text-white text-sm"></i>
+                        </div>
+                        <div class="bg-gray-100 rounded-lg p-3 max-w-xs">
+                            <p class="text-sm text-gray-800">Hi! I'm here to help you learn. Ask me anything!</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="flex gap-2">
+                <input type="text"
+                       id="chat-input"
+                       placeholder="Ask a question..."
+                       class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-600 text-sm"
+                       onkeypress="if(event.key==='Enter') sendMessage()">
+                <button onclick="sendMessage()"
+                        class="px-4 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-lg hover:shadow-lg transition">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const studentId = '{{ student.student_id }}';
+        let chatbotMinimized = false;
+
+        function toggleChatbot() {
+            const chatbot = document.getElementById('chatbot');
+            const chatbotBody = document.getElementById('chatbot-body');
+            const toggleIcon = document.getElementById('chatbot-toggle-icon');
+
+            chatbotMinimized = !chatbotMinimized;
+
+            if (chatbotMinimized) {
+                chatbot.classList.add('chatbot-minimized');
+                chatbotBody.style.display = 'none';
+                toggleIcon.classList.remove('fa-chevron-down');
+                toggleIcon.classList.add('fa-chevron-up');
+            } else {
+                chatbot.classList.remove('chatbot-minimized');
+                chatbotBody.style.display = 'block';
+                toggleIcon.classList.remove('fa-chevron-up');
+                toggleIcon.classList.add('fa-chevron-down');
+            }
+        }
+
+        async function sendMessage() {
+            const input = document.getElementById('chat-input');
+            const message = input.value.trim();
+
+            if (!message) return;
+
+            // Add user message
+            addMessage(message, 'user');
+            input.value = '';
+
+            // Show typing indicator
+            showTypingIndicator();
+
+            // Send to backend
+            try {
+                const response = await fetch(`/student/${studentId}/learn/api/chat`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        message: message,
+                        topic: '',
+                        context: 'dashboard'
+                    })
+                });
+
+                const data = await response.json();
+
+                // Remove typing indicator
+                removeTypingIndicator();
+
+                // Add bot response
+                addMessage(data.response || 'Sorry, I could not process that.', 'bot');
+            } catch (error) {
+                console.error('Error:', error);
+                removeTypingIndicator();
+                addMessage('Sorry, I encountered an error. Please try again.', 'bot');
+            }
+        }
+
+        function addMessage(text, sender) {
+            const messagesContainer = document.getElementById('chat-messages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'chat-message mb-3';
+
+            if (sender === 'user') {
+                messageDiv.innerHTML = `
+                    <div class="flex items-start justify-end">
+                        <div class="bg-gradient-to-r from-purple-600 to-indigo-600 rounded-lg p-3 max-w-xs">
+                            <p class="text-sm text-white">${text}</p>
+                        </div>
+                        <div class="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center ml-2 flex-shrink-0">
+                            <i class="fas fa-user text-white text-sm"></i>
+                        </div>
+                    </div>
+                `;
+            } else {
+                messageDiv.innerHTML = `
+                    <div class="flex items-start">
+                        <div class="w-8 h-8 bg-purple-600 rounded-full flex items-center justify-center mr-2 flex-shrink-0">
+                            <i class="fas fa-robot text-white text-sm"></i>
+                        </div>
+                        <div class="bg-gray-100 rounded-lg p-3 max-w-xs">
+                            <p class="text-sm text-gray-800">${text}</p>
+                        </div>
+                    </div>
+                `;
+            }
+
+            messagesContainer.appendChild(messageDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        function showTypingIndicator() {
+            const messagesContainer = document.getElementById('chat-messages');
+            const typingDiv = document.createElement('div');
+            typingDiv.id = 'typing-indicator';
+            typingDiv.className = 'chat-message mb-3';
+            typingDiv.innerHTML = `
+                <div class="flex items-start">
+                    <div class="w-8 h-8 bg-purple-600 rounded-full flex items-center justify-center mr-2 flex-shrink-0">
+                        <i class="fas fa-robot text-white text-sm"></i>
+                    </div>
+                    <div class="bg-gray-100 rounded-lg p-3">
+                        <p class="text-sm text-gray-600">
+                            <i class="fas fa-spinner fa-spin mr-2"></i>Typing...
+                        </p>
+                    </div>
+                </div>
+            `;
+            messagesContainer.appendChild(typingDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        function removeTypingIndicator() {
+            const indicator = document.getElementById('typing-indicator');
+            if (indicator) {
+                indicator.remove();
+            }
+        }
+    </script>
+</body>
+</html>
+

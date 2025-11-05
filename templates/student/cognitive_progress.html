@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cognitive Progress - BIT Tutor</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        .mastery-bar {
+            transition: width 1s ease-in-out;
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 min-h-screen">
+    <!-- Header -->
+    <div class="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h1 class="text-3xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+                        <i class="fas fa-brain mr-2"></i>Cognitive Progress Dashboard
+                    </h1>
+                    <p class="text-sm text-gray-600 mt-1">Track your learning journey with AI-powered diagnostics</p>
+                </div>
+                <a href="/student/{{ student_id }}/dashboard" 
+                   class="px-4 py-2 bg-gradient-to-r from-gray-600 to-gray-700 text-white rounded-lg hover:shadow-lg transition">
+                    <i class="fas fa-arrow-left mr-2"></i>Back to Dashboard
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Overall Score & Status -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            <div class="glass-card rounded-xl p-6 shadow-lg text-center">
+                <i class="fas fa-trophy text-5xl text-yellow-500 mb-3"></i>
+                <p class="text-sm text-gray-600 mb-1">Overall Score</p>
+                <p class="text-4xl font-bold text-indigo-600">{{ overall_score }}%</p>
+            </div>
+            
+            <div class="glass-card rounded-xl p-6 shadow-lg text-center">
+                <i class="fas fa-check-circle text-5xl text-green-500 mb-3"></i>
+                <p class="text-sm text-gray-600 mb-1">Concepts Mastered</p>
+                <p class="text-4xl font-bold text-green-600">{{ mastered_concepts }}/{{ total_concepts }}</p>
+            </div>
+            
+            <div class="glass-card rounded-xl p-6 shadow-lg text-center">
+                <i class="fas fa-chart-line text-5xl text-blue-500 mb-3"></i>
+                <p class="text-sm text-gray-600 mb-1">Topics Completed</p>
+                <p class="text-4xl font-bold text-blue-600">{{ completed_topics }}/{{ total_topics }}</p>
+            </div>
+            
+            <div class="glass-card rounded-xl p-6 shadow-lg text-center">
+                <i class="fas fa-fire text-5xl text-orange-500 mb-3"></i>
+                <p class="text-sm text-gray-600 mb-1">Learning Streak</p>
+                <p class="text-4xl font-bold text-orange-600">{{ streak_days }} days</p>
+            </div>
+        </div>
+
+        <!-- Skills Spider Web Chart -->
+        <div class="glass-card rounded-xl p-8 shadow-lg mb-8">
+            <h2 class="text-2xl font-bold text-gray-900 mb-6">
+                <i class="fas fa-spider mr-2 text-indigo-600"></i>Skills Radar - Your Knowledge Profile
+            </h2>
+            <p class="text-gray-600 mb-6">
+                Visual representation of your mastery across all key concepts. The web grows as you learn!
+            </p>
+
+            <div class="flex justify-center">
+                <div style="width: 600px; height: 600px;">
+                    <canvas id="skillsRadarChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Cognitive Diagnosis System -->
+        <div class="glass-card rounded-xl p-8 shadow-lg mb-8">
+            <h2 class="text-2xl font-bold text-gray-900 mb-6">
+                <i class="fas fa-brain mr-2 text-indigo-600"></i>Cognitive Diagnosis (G-CDM)
+            </h2>
+            <p class="text-gray-600 mb-6">
+                Our Graph Neural Network analyzes your knowledge state across all concepts.
+                This persistent, interpretable profile shows your conceptual mastery.
+            </p>
+            
+            <div class="space-y-4">
+                {% for concept in cognitive_profile %}
+                <div class="border border-gray-200 rounded-lg p-4 bg-white">
+                    <div class="flex items-center justify-between mb-2">
+                        <div class="flex items-center">
+                            {% if concept.mastery >= 0.8 %}
+                            <i class="fas fa-check-circle text-green-500 text-xl mr-3"></i>
+                            {% elif concept.mastery >= 0.5 %}
+                            <i class="fas fa-circle-half-stroke text-yellow-500 text-xl mr-3"></i>
+                            {% else %}
+                            <i class="fas fa-circle text-red-500 text-xl mr-3"></i>
+                            {% endif %}
+                            <div>
+                                <h3 class="font-semibold text-gray-900">{{ concept.name }}</h3>
+                                <p class="text-xs text-gray-500">{{ concept.topic }}</p>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-2xl font-bold 
+                                {% if concept.mastery >= 0.8 %}text-green-600
+                                {% elif concept.mastery >= 0.5 %}text-yellow-600
+                                {% else %}text-red-600{% endif %}">
+                                {{ (concept.mastery * 100)|int }}%
+                            </p>
+                            <p class="text-xs text-gray-500">Mastery</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Mastery Bar -->
+                    <div class="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
+                        <div class="mastery-bar h-full rounded-full 
+                            {% if concept.mastery >= 0.8 %}bg-gradient-to-r from-green-400 to-green-600
+                            {% elif concept.mastery >= 0.5 %}bg-gradient-to-r from-yellow-400 to-yellow-600
+                            {% else %}bg-gradient-to-r from-red-400 to-red-600{% endif %}"
+                             style="width: {{ (concept.mastery * 100)|int }}%">
+                        </div>
+                    </div>
+                    
+                    <!-- Recommendations -->
+                    {% if concept.mastery < 0.8 %}
+                    <div class="mt-3 p-3 bg-blue-50 rounded-lg">
+                        <p class="text-sm text-blue-800">
+                            <i class="fas fa-lightbulb mr-2"></i>
+                            <strong>Recommendation:</strong> {{ concept.recommendation }}
+                        </p>
+                    </div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Topic Progress with Completion Status -->
+        <div class="glass-card rounded-xl p-8 shadow-lg mb-8">
+            <h2 class="text-2xl font-bold text-gray-900 mb-6">
+                <i class="fas fa-tasks mr-2 text-purple-600"></i>Topic Progress & Completion
+            </h2>
+            
+            <div class="space-y-4">
+                {% for topic in topic_progress %}
+                <div class="border border-gray-200 rounded-lg p-6 bg-white">
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="flex-1">
+                            <div class="flex items-center mb-2">
+                                <h3 class="text-xl font-semibold text-gray-900 mr-3">{{ topic.name }}</h3>
+                                {% if topic.completed %}
+                                <span class="px-3 py-1 bg-green-100 text-green-800 text-xs font-semibold rounded-full">
+                                    <i class="fas fa-check mr-1"></i>COMPLETED
+                                </span>
+                                {% elif topic.in_progress %}
+                                <span class="px-3 py-1 bg-blue-100 text-blue-800 text-xs font-semibold rounded-full">
+                                    <i class="fas fa-spinner mr-1"></i>IN PROGRESS
+                                </span>
+                                {% else %}
+                                <span class="px-3 py-1 bg-gray-100 text-gray-800 text-xs font-semibold rounded-full">
+                                    <i class="fas fa-lock mr-1"></i>NOT STARTED
+                                </span>
+                                {% endif %}
+                            </div>
+                            <p class="text-sm text-gray-600">{{ topic.description }}</p>
+                        </div>
+                        <div class="text-right ml-4">
+                            <p class="text-3xl font-bold text-indigo-600">{{ topic.score }}%</p>
+                            <p class="text-xs text-gray-500">Score</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Progress Breakdown -->
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+                        <div class="text-center p-3 bg-blue-50 rounded-lg">
+                            <i class="fas fa-video text-blue-600 mb-1"></i>
+                            <p class="text-xs text-gray-600">Videos</p>
+                            <p class="font-semibold text-blue-600">{{ topic.videos_watched }}/{{ topic.total_videos }}</p>
+                        </div>
+                        <div class="text-center p-3 bg-green-50 rounded-lg">
+                            <i class="fas fa-book text-green-600 mb-1"></i>
+                            <p class="text-xs text-gray-600">Reading</p>
+                            <p class="font-semibold text-green-600">{{ topic.readings_completed }}/{{ topic.total_readings }}</p>
+                        </div>
+                        <div class="text-center p-3 bg-purple-50 rounded-lg">
+                            <i class="fas fa-flask text-purple-600 mb-1"></i>
+                            <p class="text-xs text-gray-600">Lab</p>
+                            <p class="font-semibold text-purple-600">
+                                {% if topic.lab_completed %}<i class="fas fa-check"></i>{% else %}<i class="fas fa-times"></i>{% endif %}
+                            </p>
+                        </div>
+                        <div class="text-center p-3 bg-orange-50 rounded-lg">
+                            <i class="fas fa-question-circle text-orange-600 mb-1"></i>
+                            <p class="text-xs text-gray-600">Quiz</p>
+                            <p class="font-semibold text-orange-600">
+                                {% if topic.quiz_completed %}<i class="fas fa-check"></i>{% else %}<i class="fas fa-times"></i>{% endif %}
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <!-- Overall Progress Bar -->
+                    <div class="w-full bg-gray-200 rounded-full h-4 overflow-hidden">
+                        <div class="h-full bg-gradient-to-r from-indigo-500 to-purple-600 rounded-full transition-all duration-1000"
+                             style="width: {{ topic.progress }}%">
+                        </div>
+                    </div>
+                    <p class="text-sm text-gray-600 mt-2 text-right">{{ topic.progress }}% Complete</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Assessment History -->
+        <div class="glass-card rounded-xl p-8 shadow-lg">
+            <h2 class="text-2xl font-bold text-gray-900 mb-6">
+                <i class="fas fa-history mr-2 text-blue-600"></i>Assessment History
+            </h2>
+            
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Type</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Topic</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Score</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        {% for assessment in assessment_history %}
+                        <tr class="hover:bg-gray-50">
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                {{ assessment.date }}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span class="px-2 py-1 text-xs font-semibold rounded-full
+                                    {% if assessment.type == 'Initial' %}bg-purple-100 text-purple-800
+                                    {% elif assessment.type == 'Pre-Topic' %}bg-blue-100 text-blue-800
+                                    {% else %}bg-green-100 text-green-800{% endif %}">
+                                    {{ assessment.type }}
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                {{ assessment.topic }}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span class="text-lg font-bold 
+                                    {% if assessment.score >= 80 %}text-green-600
+                                    {% elif assessment.score >= 60 %}text-yellow-600
+                                    {% else %}text-red-600{% endif %}">
+                                    {{ assessment.score }}%
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <i class="fas fa-check-circle text-green-500"></i>
+                                <span class="text-sm text-gray-600 ml-1">Completed</span>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Skills Radar Chart
+        const ctx = document.getElementById('skillsRadarChart').getContext('2d');
+
+        // Prepare data from cognitive profile
+        const conceptNames = [];
+        const masteryLevels = [];
+
+        {% for concept in cognitive_profile %}
+            conceptNames.push('{{ concept.concept_name }}');
+            masteryLevels.push({{ concept.mastery_level }});
+        {% endfor %}
+
+        // Create gradient
+        const gradient = ctx.createLinearGradient(0, 0, 0, 400);
+        gradient.addColorStop(0, 'rgba(99, 102, 241, 0.8)');
+        gradient.addColorStop(1, 'rgba(168, 85, 247, 0.8)');
+
+        const skillsRadarChart = new Chart(ctx, {
+            type: 'radar',
+            data: {
+                labels: conceptNames,
+                datasets: [{
+                    label: 'Mastery Level (%)',
+                    data: masteryLevels,
+                    backgroundColor: 'rgba(99, 102, 241, 0.2)',
+                    borderColor: 'rgb(99, 102, 241)',
+                    borderWidth: 3,
+                    pointBackgroundColor: 'rgb(99, 102, 241)',
+                    pointBorderColor: '#fff',
+                    pointHoverBackgroundColor: '#fff',
+                    pointHoverBorderColor: 'rgb(99, 102, 241)',
+                    pointRadius: 6,
+                    pointHoverRadius: 8
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                scales: {
+                    r: {
+                        beginAtZero: true,
+                        max: 100,
+                        min: 0,
+                        ticks: {
+                            stepSize: 20,
+                            font: {
+                                size: 12,
+                                weight: 'bold'
+                            },
+                            color: '#4B5563',
+                            backdropColor: 'transparent'
+                        },
+                        grid: {
+                            color: 'rgba(156, 163, 175, 0.3)',
+                            lineWidth: 2
+                        },
+                        angleLines: {
+                            color: 'rgba(156, 163, 175, 0.3)',
+                            lineWidth: 2
+                        },
+                        pointLabels: {
+                            font: {
+                                size: 14,
+                                weight: 'bold'
+                            },
+                            color: '#1F2937'
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'top',
+                        labels: {
+                            font: {
+                                size: 14,
+                                weight: 'bold'
+                            },
+                            color: '#1F2937',
+                            padding: 20
+                        }
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                        titleFont: {
+                            size: 14,
+                            weight: 'bold'
+                        },
+                        bodyFont: {
+                            size: 13
+                        },
+                        padding: 12,
+                        cornerRadius: 8,
+                        callbacks: {
+                            label: function(context) {
+                                return 'Mastery: ' + context.parsed.r + '%';
+                            }
+                        }
+                    }
+                },
+                animation: {
+                    duration: 2000,
+                    easing: 'easeInOutQuart'
+                }
+            }
+        });
+    </script>
+</body>
+</html>
+

@@ -11,6 +11,7 @@ import pickle
 import random
 import uuid
 import re
+import secrets
 from datetime import datetime, timedelta
 import numpy as np
 import requests
@@ -36,20 +37,70 @@ import pandas as pd
 import base64
 from io import BytesIO
 
+# Load environment variables for secure configuration
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+    print("✅ Environment variables loaded")
+except ImportError:
+    print("⚠️  python-dotenv not installed. Run: pip install python-dotenv")
+
+# Import personalized learning platform components
+# Note: These imports are done after the main services to avoid circular dependencies
+
+
+
 # Import AI modules from new services structure
-from services.knowledge_graph import build_cognitive_foundation, StudentKnowledgeGraph
-from services.knowledge_tracing import LLM_Skill_Extractor
-from services.cognitive_diagnosis import LLM_Cold_Start_Assessor, GNN_CDM, ExplainableAIEngine
-from services.recommendation import LLM_Content_Generator, RL_Recommender_Agent
+print("📦 Loading AI modules...")
+try:
+    from services.knowledge_graph import build_cognitive_foundation, StudentKnowledgeGraph
+    print("✅ Knowledge Graph module loaded")
+except Exception as e:
+    print(f"⚠️  Warning: Could not load Knowledge Graph module: {e}")
+    raise
+
+try:
+    from services.knowledge_tracing import LLM_Skill_Extractor
+    print("✅ Knowledge Tracing module loaded")
+except Exception as e:
+    print(f"⚠️  Warning: Could not load Knowledge Tracing module: {e}")
+    raise
+
+try:
+    from services.cognitive_diagnosis import LLM_Cold_Start_Assessor, GNN_CDM, ExplainableAIEngine
+    print("✅ Cognitive Diagnosis module loaded")
+except Exception as e:
+    print(f"⚠️  Warning: Could not load Cognitive Diagnosis module: {e}")
+    raise
+
+try:
+    from services.recommendation import LLM_Content_Generator, RL_Recommender_Agent
+    print("✅ Recommendation module loaded")
+except Exception as e:
+    print(f"⚠️  Warning: Could not load Recommendation module: {e}")
+    raise
 
 # Initialize Flask app with modern configuration
 app = Flask(__name__)
-app.secret_key = 'bit_tutor_ultra_secure_key_2025'
+
+# SECURITY FIX: Use environment variable for secret key
+app.secret_key = os.environ.get('SECRET_KEY')
+if not app.secret_key:
+    # Generate secure random key if not in environment
+    app.secret_key = secrets.token_hex(32)
+    print("⚠️  WARNING: Using generated secret key. Set SECRET_KEY in .env file for production!")
+    print("   Generate one with: python3 -c 'import secrets; print(secrets.token_hex(32))'")
+else:
+    print("✅ Secret key loaded from environment")
+
+from datetime import timedelta
 app.config.update(
     SESSION_COOKIE_PATH='/',
-    SESSION_COOKIE_HTTPONLY=False,
-    SESSION_COOKIE_SECURE=False,
+    SESSION_COOKIE_HTTPONLY=True,  # FIXED: Security improvement
+    SESSION_COOKIE_SECURE=False,  # Set to True in production with HTTPS
+    SESSION_COOKIE_SAMESITE='Lax',  # FIXED: CSRF protection
     SESSION_REFRESH_EACH_REQUEST=True,
+    PERMANENT_SESSION_LIFETIME=timedelta(hours=24),  # FIXED: Session timeout
     TEMPLATES_AUTO_RELOAD=True
 )
 
@@ -59,165 +110,111 @@ foundational_kg, qm, kcs = build_cognitive_foundation()
 xai_engine = ExplainableAIEngine(kcs)
 existing_exercises = list(qm.index)
 action_space = existing_exercises + list(kcs.keys())
-rl_agent = RL_Recommender_Agent(kcs, existing_exercises, action_space_size=len(action_space))
 
-# Global data storage
+# Try to initialize RL agent (requires torch)
+try:
+    rl_agent = RL_Recommender_Agent(kcs, existing_exercises, action_space_size=len(action_space))
+    print("✅ RL Recommender Agent initialized")
+except ImportError as e:
+    print(f"⚠️  Warning: RL Agent not available (requires torch): {e}")
+    rl_agent = None
+
+# Initialize Personalized Learning Platform
+print("🎓 Initializing Personalized Learning Platform...")
+try:
+    from services.knowledge_graph.services.dynamic_graph_manager import DynamicGraphManager
+    from services.cognitive_diagnosis.services.assessment_engine import AssessmentEngine
+    from services.knowledge_graph.services.lab_tutor_loader import get_lab_tutor_loader
+    from services.content_generation.services.llm_blog_generator import get_blog_generator
+    from services.content_generation.services.question_generator import get_question_generator
+    from services.content_generation.services.quiz_generator import get_quiz_generator
+    from services.content_generation.services.lab_generator import get_lab_generator
+    from services.content_generation.services.content_fetcher_agent import ContentFetcherAgent
+    from services.chatbot.learning_assistant import get_learning_assistant
+    from routes.teacher_routes import init_teacher_routes
+    from routes.student_portfolio_routes import init_student_portfolio_routes
+    from routes.student_learning_routes import init_student_learning_routes
+    from routes.student_registration_routes import student_registration_bp, init_registration_routes
+    from routes.student_portal_routes import student_portal_bp, init_portal_routes
+    from services.auth.student_auth import StudentAuthService
+
+    dynamic_graph_manager = DynamicGraphManager()
+    dynamic_graph_manager.initialize_schema()
+    assessment_engine = AssessmentEngine(dynamic_graph_manager)
+
+    # Initialize authentication service
+    auth_service = StudentAuthService(dynamic_graph_manager)
+
+    # Initialize content generation and chatbot services
+    lab_tutor_loader = get_lab_tutor_loader()
+    blog_generator = get_blog_generator(use_llm=False)  # Set to True if OpenAI API key is available
+    question_generator = get_question_generator(use_llm=False)  # Set to True for LLM-based questions
+    quiz_generator = get_quiz_generator(use_llm=False)  # Set to True for LLM-based quizzes
+    lab_generator = get_lab_generator(use_llm=False)  # Set to True for LLM-based labs
+    learning_assistant = get_learning_assistant(use_llm=False)  # Set to True for LLM-based chatbot
+
+    # Initialize content fetcher agent for videos and reading materials
+    youtube_api_key = os.environ.get('YOUTUBE_API_KEY')  # Optional: set for real YouTube videos
+    content_fetcher = ContentFetcherAgent(youtube_api_key=youtube_api_key)
+    print("✅ Content Fetcher Agent initialized")
+
+    # Initialize routes with proper dependencies
+    teacher_blueprint = init_teacher_routes(dynamic_graph_manager)
+    init_student_portfolio_routes(app, dynamic_graph_manager, assessment_engine)
+    init_student_learning_routes(app, dynamic_graph_manager, assessment_engine, lab_tutor_loader,
+                                 blog_generator, question_generator, quiz_generator, lab_generator,
+                                 learning_assistant, content_fetcher)
+    init_registration_routes(dynamic_graph_manager)
+    init_portal_routes(dynamic_graph_manager, auth_service)
+
+    # Register blueprints
+    app.register_blueprint(teacher_blueprint)
+    app.register_blueprint(student_registration_bp)
+    app.register_blueprint(student_portal_bp)
+    print("✅ Teacher routes initialized")
+    print("✅ Student registration routes initialized")
+    print("✅ Student portal routes initialized")
+
+    print("✅ Personalized Learning Platform initialized successfully")
+except Exception as e:
+    print(f"⚠️  Warning: Could not initialize Personalized Learning Platform: {e}")
+    print(f"   Error details: {type(e).__name__}")
+    import traceback
+    traceback.print_exc()
+    print("   Continuing with core BIT Tutor functionality...")
+    dynamic_graph_manager = None
+    assessment_engine = None
+
+# FIXED: Add error handlers for better error management
+@app.errorhandler(404)
+def not_found(error):
+    """Handle 404 errors"""
+    return jsonify({'error': 'Resource not found'}), 404
+
+@app.errorhandler(500)
+def internal_error(error):
+    """Handle 500 errors"""
+    print(f"❌ Internal Server Error: {error}")
+    return jsonify({'error': 'Internal server error'}), 500
+
+@app.errorhandler(Exception)
+def handle_exception(error):
+    """Handle all exceptions"""
+    print(f"❌ Unhandled Exception: {error}")
+    import traceback
+    traceback.print_exc()
+    return jsonify({'error': 'An error occurred'}), 500
+
+# Global data storage (DEPRECATED - Using Neo4j now)
+# Create empty dict to prevent errors in deprecated routes
 students_data = {}
 analytics_cache = {}
 
-def load_student_data():
-    """Load all student data with enhanced analytics"""
-    global students_data
-    data_dir = "data"
-    
-    if not os.path.exists(data_dir):
-        os.makedirs(data_dir)
-    
-    # Enhanced student profiles with AI-generated insights
-    student_profiles = {
-        'alice': {
-            'name': 'Alice Chen',
-            'avatar': '👩‍💻',
-            'level': 'Advanced',
-            'specialty': 'Machine Learning',
-            'learning_style': 'Visual',
-            'engagement_score': 94,
-            'streak_days': 23,
-            'total_xp': 15420,
-            'badges': ['🏆 ML Master', '🔥 Code Ninja', '📊 Data Wizard'],
-            'current_focus': 'Deep Learning Architectures',
-            'hobbies': ['🎮 Gaming', '📸 Photography', '🎵 Music Production', '🏃‍♀️ Running'],
-            'favorite_topics': ['Computer Vision', 'Neural Networks', 'AI Ethics']
-        },
-        'bob': {
-            'name': 'Bob Rodriguez',
-            'avatar': '👨‍🔬',
-            'level': 'Intermediate',
-            'specialty': 'Data Science',
-            'learning_style': 'Kinesthetic',
-            'engagement_score': 87,
-            'streak_days': 15,
-            'total_xp': 9850,
-            'badges': ['📈 Analytics Pro', '🎯 Problem Solver'],
-            'current_focus': 'Statistical Modeling',
-            'hobbies': ['⚽ Soccer', '🎲 Board Games', '🍳 Cooking', '📚 Reading'],
-            'favorite_topics': ['Sports Analytics', 'Market Research', 'Predictive Modeling']
-        },
-        'charlie': {
-            'name': 'Charlie Kim',
-            'avatar': '👨‍💼',
-            'level': 'Beginner',
-            'specialty': 'Programming Fundamentals',
-            'learning_style': 'Auditory',
-            'engagement_score': 76,
-            'streak_days': 8,
-            'total_xp': 4200,
-            'badges': ['🌟 Rising Star', '💡 Quick Learner'],
-            'current_focus': 'Object-Oriented Programming',
-            'hobbies': ['🎸 Guitar', '🎬 Movies', '✈️ Travel', '🎨 Drawing'],
-            'favorite_topics': ['Web Development', 'Mobile Apps', 'User Interface Design']
-        },
-        'dana': {
-            'name': 'Dana Patel',
-            'avatar': '👩‍🎓',
-            'level': 'Expert',
-            'specialty': 'AI Research',
-            'learning_style': 'Reading/Writing',
-            'engagement_score': 98,
-            'streak_days': 45,
-            'total_xp': 28750,
-            'badges': ['🧠 AI Pioneer', '📚 Research Master', '🌟 Mentor'],
-            'current_focus': 'Reinforcement Learning',
-            'hobbies': ['♟️ Chess', '🧩 Puzzles', '🌱 Gardening', '📖 Philosophy'],
-            'favorite_topics': ['Quantum Computing', 'Ethical AI', 'Cognitive Science']
-        },
-        'evan': {
-            'name': 'Evan Thompson',
-            'avatar': '👨‍🚀',
-            'level': 'Intermediate',
-            'specialty': 'Software Engineering',
-            'learning_style': 'Multimodal',
-            'engagement_score': 82,
-            'streak_days': 12,
-            'total_xp': 7890,
-            'badges': ['⚡ Code Speedster', '🔧 Bug Hunter'],
-            'current_focus': 'System Design Patterns',
-            'hobbies': ['🚀 Space Exploration', '🎯 Archery', '🏔️ Hiking', '🤖 Robotics'],
-            'favorite_topics': ['Cloud Computing', 'DevOps', 'Microservices']
-        }
-    }
-    
-    for student_id, profile in student_profiles.items():
-        file_path = os.path.join(data_dir, f"student_{student_id}.pkl")
-        
-        if os.path.exists(file_path):
-            try:
-                with open(file_path, 'rb') as f:
-                    kg_data = pickle.load(f)
-                    students_data[student_id] = {
-                        'profile': profile,
-                        'knowledge_graph': kg_data,
-                        'analytics': generate_advanced_analytics(student_id, kg_data, profile)
-                    }
-                    print(f"✅ Loaded enhanced data for {profile['name']}")
-            except Exception as e:
-                print(f"⚠️ Error loading {student_id}: {e}")
-                students_data[student_id] = create_demo_student_data(student_id, profile)
-        else:
-            students_data[student_id] = create_demo_student_data(student_id, profile)
+# NOTE: Old hardcoded student data removed - now using Neo4j database
+# All student data is stored in Neo4j and accessed via StudentAuthService
 
-def create_demo_student_data(student_id, profile):
-    """Create rich demo data for students"""
-    return {
-        'profile': profile,
-        'knowledge_graph': None,
-        'analytics': {
-            'performance_trend': generate_performance_trend(),
-            'skill_mastery': generate_skill_mastery(),
-            'learning_velocity': generate_learning_velocity(),
-            'engagement_patterns': generate_engagement_patterns(),
-            'ai_insights': generate_ai_insights(profile),
-            'next_recommendations': generate_smart_recommendations(profile)
-        }
-    }
-
-def generate_performance_trend():
-    """Generate realistic performance trend data"""
-    dates = [(datetime.now() - timedelta(days=x)).strftime('%Y-%m-%d') for x in range(30, 0, -1)]
-    base_score = random.uniform(70, 85)
-    trend = [base_score + random.uniform(-5, 8) + (i * 0.3) for i in range(30)]
-    return {'dates': dates, 'scores': [max(0, min(100, score)) for score in trend]}
-
-def generate_skill_mastery():
-    """Generate skill mastery data"""
-    skills = ['Python', 'Machine Learning', 'Data Analysis', 'Statistics', 'Deep Learning', 'NLP', 'Computer Vision']
-    return {skill: random.uniform(60, 95) for skill in skills}
-
-def generate_learning_velocity():
-    """Generate learning velocity metrics"""
-    return {
-        'concepts_per_week': random.uniform(8, 15),
-        'practice_hours': random.uniform(12, 25),
-        'completion_rate': random.uniform(85, 98),
-        'retention_score': random.uniform(78, 92)
-    }
-
-def generate_engagement_patterns():
-    """Generate engagement pattern data"""
-    hours = list(range(24))
-    activity = [random.uniform(0, 1) * (1 if 9 <= h <= 22 else 0.3) for h in hours]
-    return {'hours': hours, 'activity_levels': activity}
-
-def generate_ai_insights(profile):
-    """Generate AI-powered insights"""
-    insights = [
-        f"🎯 {profile['name']} shows exceptional progress in {profile['specialty']}",
-        f"📈 Learning velocity increased by 23% this week",
-        f"🧠 Optimal learning time: 2-4 PM based on engagement patterns",
-        f"💡 Recommended focus: Advanced topics in {profile['current_focus']}",
-        f"🔥 {profile['streak_days']}-day streak shows strong commitment"
-    ]
-    return random.sample(insights, 3)
+# DEPRECATED: Old demo data generation functions - no longer needed with Neo4j
+# All analytics and insights are now generated from real student data in Neo4j
 
 def generate_smart_recommendations(profile):
     """Generate smart AI recommendations based on hobbies and interests"""
@@ -1897,109 +1894,89 @@ def generate_advanced_analytics(student_id, kg_data, profile):
     
     return analytics
 
-# Load student data on startup
-load_student_data()
-print(f"🎓 Loaded {len(students_data)} student profiles")
+# DEPRECATED: Old hardcoded student routes - replaced by new student portal
+# All student routes are now handled by student_portal_bp blueprint
 
+# Redirect root to student portal
 @app.route('/')
 def nexus_home():
-    """BIT Tutor Home - Student Selection Hub"""
-    return render_template('nexus_home.html', students=students_data)
+    """Redirect to student portal"""
+    return redirect(url_for('student_portal.portal_home'))
 
-@app.route('/student/<student_id>')
-def student_nexus(student_id):
-    """Individual Student BIT Tutor Dashboard"""
-    if student_id not in students_data:
-        return redirect(url_for('nexus_home'))
-    
-    student = students_data[student_id]
-    session['current_student'] = student_id
-    
-    return render_template('nexus_dashboard.html', 
-                         student=student, 
-                         student_id=student_id)
+# DEPRECATED: Old API routes - replaced by blueprint routes
+# All API endpoints are now handled by student_learning_bp and student_portal_bp blueprints
 
-@app.route('/api/student/<student_id>/analytics')
-def get_student_analytics(student_id):
-    """API endpoint for real-time analytics"""
-    if student_id not in students_data:
-        return jsonify({'error': 'Student not found'}), 404
-    
-    return jsonify(students_data[student_id]['analytics'])
-
-@app.route('/api/student/<student_id>/live_metrics')
-def get_live_metrics(student_id):
-    """API endpoint for live dashboard metrics"""
-    if student_id not in students_data:
-        return jsonify({'error': 'Student not found'}), 404
-
-    # Simulate real-time metrics
-    metrics = {
-        'current_session_time': random.randint(15, 120),
-        'concepts_learned_today': random.randint(2, 8),
-        'accuracy_rate': random.uniform(85, 98),
-        'focus_score': random.uniform(75, 95),
-        'ai_confidence': random.uniform(88, 99),
-        'next_milestone_progress': random.uniform(60, 85)
-    }
-
-    return jsonify(metrics)
-
-@app.route('/api/student/<student_id>/personalized_labs')
-def get_personalized_labs(student_id):
-    """API endpoint for knowledge graph-based learning labs"""
-    if student_id not in students_data:
-        return jsonify({'error': 'Student not found'}), 404
-
-    profile = students_data[student_id]['profile']
-    student_kg = students_data[student_id].get('knowledge_graph')
-
-    # Generate labs using knowledge graph
-    labs = comprehensive_ai.lab_generator.generate_accessible_labs(profile, student_kg)
-
-    return jsonify({
-        'labs': labs,
-        'student_name': profile['name'],
-        'knowledge_graph_enabled': student_kg is not None
-    })
-
-@app.route('/api/student/<student_id>/personalized_quizzes')
-def get_personalized_quizzes(student_id):
-    """API endpoint for knowledge graph-based quizzes"""
-    if student_id not in students_data:
-        return jsonify({'error': 'Student not found'}), 404
-
-    profile = students_data[student_id]['profile']
-    student_kg = students_data[student_id].get('knowledge_graph')
-
-    # Generate quizzes using knowledge graph
-    quizzes = comprehensive_ai.quiz_generator.generate_accessible_quizzes(profile, student_kg)
-
-    return jsonify({
-        'quizzes': quizzes,
-        'student_name': profile['name'],
-        'knowledge_graph_enabled': student_kg is not None
-    })
-
-@app.route('/api/student/<student_id>/learning_materials')
-def get_learning_materials(student_id):
-    """API endpoint for knowledge graph-based learning materials"""
-    if student_id not in students_data:
-        return jsonify({'error': 'Student not found'}), 404
-
-    profile = students_data[student_id]['profile']
-    student_kg = students_data[student_id].get('knowledge_graph')
-
-    # Generate learning materials using knowledge graph
-    materials = comprehensive_ai.materials_generator.generate_learning_materials(profile, student_kg)
-
-    return jsonify({
-        'materials': materials,
-        'student_name': profile['name'],
-        'knowledge_graph_enabled': student_kg is not None,
-        'total_materials': len(materials),
-        'generated_at': datetime.now().isoformat()
-    })
+# COMMENTED OUT - students_data no longer exists, using Neo4j instead
+# @app.route('/api/student/<student_id>/topics')
+# def get_student_topics(student_id):
+#     """API endpoint to fetch topics from Neo4j knowledge graph"""
+#     if student_id not in students_data:
+#         return jsonify({'error': 'Student not found'}), 404
+#
+#     topics = []
+#     total_concepts = 0
+#     total_quizzes = 0
+#     total_labs = 0
+#
+#     if dynamic_graph_manager and dynamic_graph_manager.neo4j:
+#         try:
+#             # Get topics from the student's registered class with counts
+#             query = """
+#             MATCH (s:Student {student_id: $student_id})-[:REGISTERED_IN]->(c:Class)-[:INCLUDES]->(t:Topic)
+#             OPTIONAL MATCH (t)-[:INCLUDES_CONCEPT]->(concept:Concept)
+#             OPTIONAL MATCH (quiz:Quiz)-[:TESTS]->(t)
+#             OPTIONAL MATCH (lab:Lab)-[:PRACTICES]->(t)
+#             WITH t,
+#                  count(DISTINCT concept) as concept_count,
+#                  count(DISTINCT quiz) as quiz_count,
+#                  count(DISTINCT lab) as lab_count
+#             RETURN t.topic_id as topic_id,
+#                    t.name as name,
+#                    t.description as description,
+#                    t.order as order,
+#                    t.estimated_hours as estimated_hours,
+#                    concept_count,
+#                    quiz_count,
+#                    lab_count
+#             ORDER BY t.order
+#             """
+#             print(f"🔍 Fetching topics for student: {student_id}")
+#             result = dynamic_graph_manager.neo4j.graph.query(query, {'student_id': student_id})
+#
+#             if result:
+#                 for record in result:
+#                     topic_data = {
+#                         'topic_id': record['topic_id'],
+#                         'name': record['name'],
+#                         'description': record['description'],
+#                         'order': record['order'],
+#                         'estimated_hours': record['estimated_hours'],
+#                         'concept_count': record['concept_count'],
+#                         'quiz_count': record['quiz_count'],
+#                         'lab_count': record['lab_count']
+#                     }
+#                     topics.append(topic_data)
+#                     total_concepts += record['concept_count']
+#                     total_quizzes += record['quiz_count']
+#                     total_labs += record['lab_count']
+#
+#                 print(f"✅ Found {len(topics)} topics, {total_concepts} concepts, {total_quizzes} quizzes, {total_labs} labs")
+#             else:
+#                 print("⚠️ No topics found in result")
+#         except Exception as e:
+#             print(f"❌ Error fetching topics from Neo4j: {e}")
+#             import traceback
+#             traceback.print_exc()
+#             topics = []
+#
+#     return jsonify({
+#         'topics': topics,
+#         'total_topics': len(topics),
+#         'total_concepts': total_concepts,
+#         'total_quizzes': total_quizzes,
+#         'total_labs': total_labs,
+#         'student_id': student_id
+#     })
 
 # ============================================================================
 # CHATBOT FUNCTIONALITY
@@ -2300,67 +2277,69 @@ class BITTutorChatbot:
 
         return suggestions.get(hobby)
 
-@app.route('/api/student/<student_id>/chat', methods=['POST'])
-def chat_with_ai(student_id):
-    """API endpoint for comprehensive AI chatbot interactions"""
-    if student_id not in students_data:
-        return jsonify({'error': 'Student not found'}), 404
-
-    data = request.get_json()
-    if not data or 'message' not in data:
-        return jsonify({'error': 'Message is required'}), 400
-
-    user_message = data['message'].strip()
-    if not user_message:
-        return jsonify({'error': 'Message cannot be empty'}), 400
-
-    try:
-        # Generate AI response using comprehensive system
-        ai_response = comprehensive_ai.generate_comprehensive_response(user_message, student_id, students_data)
-
-        # Get student context for response metadata
-        profile = students_data[student_id]['profile']
-
-        response_data = {
-            'response': ai_response,
-            'timestamp': datetime.now().isoformat(),
-            'student_name': profile['name'],
-            'conversation_id': str(uuid.uuid4()),
-            'response_type': 'text',
-            'suggestions': _generate_follow_up_suggestions(user_message, profile),
-            'knowledge_graph_enabled': students_data[student_id].get('knowledge_graph') is not None
-        }
-
-        return jsonify(response_data)
-
-    except Exception as e:
-        return jsonify({'error': f'Failed to generate response: {str(e)}'}), 500
-
-@app.route('/api/student/<student_id>/chat/history')
-def get_chat_history(student_id):
-    """API endpoint to get chat conversation history"""
-    if student_id not in students_data:
-        return jsonify({'error': 'Student not found'}), 404
-
-    history = comprehensive_ai.conversation_history.get(student_id, [])
-
-    return jsonify({
-        'history': history,
-        'student_name': students_data[student_id]['profile']['name'],
-        'total_messages': len(history),
-        'knowledge_graph_enabled': students_data[student_id].get('knowledge_graph') is not None
-    })
-
-@app.route('/api/student/<student_id>/chat/clear', methods=['POST'])
-def clear_chat_history(student_id):
-    """API endpoint to clear chat history"""
-    if student_id not in students_data:
-        return jsonify({'error': 'Student not found'}), 404
-
-    if student_id in comprehensive_ai.conversation_history:
-        comprehensive_ai.conversation_history[student_id] = []
-
-    return jsonify({'message': 'Chat history cleared successfully'})
+# COMMENTED OUT - Deprecated routes using students_data
+# These are now handled by student_learning_bp blueprint
+# @app.route('/api/student/<student_id>/chat', methods=['POST'])
+# def chat_with_ai(student_id):
+#     """API endpoint for comprehensive AI chatbot interactions"""
+#     if student_id not in students_data:
+#         return jsonify({'error': 'Student not found'}), 404
+#
+#     data = request.get_json()
+#     if not data or 'message' not in data:
+#         return jsonify({'error': 'Message is required'}), 400
+#
+#     user_message = data['message'].strip()
+#     if not user_message:
+#         return jsonify({'error': 'Message cannot be empty'}), 400
+#
+#     try:
+#         # Generate AI response using comprehensive system
+#         ai_response = comprehensive_ai.generate_comprehensive_response(user_message, student_id, students_data)
+#
+#         # Get student context for response metadata
+#         profile = students_data[student_id]['profile']
+#
+#         response_data = {
+#             'response': ai_response,
+#             'timestamp': datetime.now().isoformat(),
+#             'student_name': profile['name'],
+#             'conversation_id': str(uuid.uuid4()),
+#             'response_type': 'text',
+#             'suggestions': _generate_follow_up_suggestions(user_message, profile),
+#             'knowledge_graph_enabled': students_data[student_id].get('knowledge_graph') is not None
+#         }
+#
+#         return jsonify(response_data)
+#
+#     except Exception as e:
+#         return jsonify({'error': f'Failed to generate response: {str(e)}'}), 500
+#
+# @app.route('/api/student/<student_id>/chat/history')
+# def get_chat_history(student_id):
+#     """API endpoint to get chat conversation history"""
+#     if student_id not in students_data:
+#         return jsonify({'error': 'Student not found'}), 404
+#
+#     history = comprehensive_ai.conversation_history.get(student_id, [])
+#
+#     return jsonify({
+#         'history': history,
+#         'student_name': students_data[student_id]['profile']['name'],
+#         'total_messages': len(history),
+#         'knowledge_graph_enabled': students_data[student_id].get('knowledge_graph') is not None
+#     })
+#
+# @app.route('/api/student/<student_id>/chat/clear', methods=['POST'])
+# def clear_chat_history(student_id):
+#     """API endpoint to clear chat history"""
+#     if student_id not in students_data:
+#         return jsonify({'error': 'Student not found'}), 404
+#
+#     if student_id in comprehensive_ai.conversation_history:
+#         comprehensive_ai.conversation_history[student_id] = []
+#
+#     return jsonify({'message': 'Chat history cleared successfully'})
 
 def _generate_follow_up_suggestions(user_message, profile):
     """Generate contextual follow-up suggestions"""
@@ -2403,158 +2382,26 @@ def _generate_follow_up_suggestions(user_message, profile):
 
     return suggestions[:3]  # Return top 3 suggestions
 
-@app.route('/api/student/<student_id>/knowledge_graph/status')
-def get_knowledge_graph_status(student_id):
-    """API endpoint to show knowledge graph updates and status"""
-    if student_id not in students_data:
-        return jsonify({'error': 'Student not found'}), 404
-
-    try:
-        student_kg = students_data[student_id].get('knowledge_graph')
-        profile = students_data[student_id]['profile']
-
-        if not student_kg:
-            return jsonify({
-                'status': 'not_initialized',
-                'message': 'Knowledge graph not yet initialized for this student',
-                'student_name': profile['name']
-            })
-
-        # Get current mastery levels
-        mastery_levels = {}
-        recent_updates = []
-
-        if hasattr(student_kg, 'graph') and student_kg.graph:
-            # Get mastery levels for all nodes
-            for node in student_kg.graph.nodes():
-                mastery = student_kg.graph.nodes[node].get('mastery_level', 0.0)
-                mastery_levels[node] = mastery
-
-            # Get recent updates (simulated for demo)
-            recent_updates = [
-                {
-                    'concept': 'Machine Learning Basics',
-                    'old_mastery': 0.6,
-                    'new_mastery': 0.75,
-                    'timestamp': datetime.now().isoformat(),
-                    'trigger': 'Quiz completion'
-                },
-                {
-                    'concept': 'Neural Networks',
-                    'old_mastery': 0.3,
-                    'new_mastery': 0.45,
-                    'timestamp': (datetime.now() - timedelta(minutes=15)).isoformat(),
-                    'trigger': 'Lab exercise'
-                },
-                {
-                    'concept': 'Data Preprocessing',
-                    'old_mastery': 0.8,
-                    'new_mastery': 0.85,
-                    'timestamp': (datetime.now() - timedelta(hours=1)).isoformat(),
-                    'trigger': 'Practice questions'
-                }
-            ]
-
-        # Calculate overall progress
-        total_concepts = len(mastery_levels) if mastery_levels else 10
-        mastered_concepts = sum(1 for level in mastery_levels.values() if level >= 0.8) if mastery_levels else 0
-        avg_mastery = sum(mastery_levels.values()) / len(mastery_levels) if mastery_levels else 0.0
-
-        return jsonify({
-            'status': 'active',
-            'student_name': profile['name'],
-            'knowledge_graph_stats': {
-                'total_concepts': total_concepts,
-                'mastered_concepts': mastered_concepts,
-                'average_mastery': round(avg_mastery, 2),
-                'mastery_percentage': round((mastered_concepts / total_concepts) * 100, 1) if total_concepts > 0 else 0
-            },
-            'mastery_levels': mastery_levels,
-            'recent_updates': recent_updates,
-            'update_triggers': [
-                'Quiz completions',
-                'Lab exercises',
-                'Practice questions',
-                'AI chat interactions',
-                'Time spent on topics'
-            ],
-            'next_recommendations': [
-                f"Focus on {profile['current_focus']} fundamentals",
-                "Complete adaptive practice exercises",
-                "Take diagnostic quiz for weak areas"
-            ]
-        })
-
-    except Exception as e:
-        return jsonify({'error': f'Failed to get knowledge graph status: {str(e)}'}), 500
-
-@app.route('/api/student/<student_id>/knowledge_graph/visualization')
-def get_knowledge_graph_visualization(student_id):
-    """API endpoint to get knowledge graph visualization data"""
-    if student_id not in students_data:
-        return jsonify({'error': 'Student not found'}), 404
-
-    try:
-        student_kg = students_data[student_id].get('knowledge_graph')
-        profile = students_data[student_id]['profile']
-
-        if not student_kg:
-            # Return sample visualization data
-            return jsonify({
-                'nodes': [
-                    {'id': 'ml_basics', 'label': 'ML Basics', 'mastery': 0.75, 'category': 'foundation'},
-                    {'id': 'neural_nets', 'label': 'Neural Networks', 'mastery': 0.45, 'category': 'advanced'},
-                    {'id': 'data_prep', 'label': 'Data Preprocessing', 'mastery': 0.85, 'category': 'foundation'},
-                    {'id': 'algorithms', 'label': 'Algorithms', 'mastery': 0.60, 'category': 'core'},
-                    {'id': 'evaluation', 'label': 'Model Evaluation', 'mastery': 0.30, 'category': 'core'}
-                ],
-                'edges': [
-                    {'source': 'ml_basics', 'target': 'neural_nets', 'strength': 0.8},
-                    {'source': 'data_prep', 'target': 'ml_basics', 'strength': 0.9},
-                    {'source': 'ml_basics', 'target': 'algorithms', 'strength': 0.7},
-                    {'source': 'algorithms', 'target': 'evaluation', 'strength': 0.6}
-                ],
-                'student_name': profile['name'],
-                'focus_area': profile['current_focus']
-            })
-
-        # If knowledge graph exists, extract real data
-        nodes = []
-        edges = []
-
-        if hasattr(student_kg, 'graph') and student_kg.graph:
-            for node in student_kg.graph.nodes():
-                node_data = student_kg.graph.nodes[node]
-                nodes.append({
-                    'id': node,
-                    'label': node.replace('_', ' ').title(),
-                    'mastery': node_data.get('mastery_level', 0.0),
-                    'category': node_data.get('category', 'general')
-                })
-
-            for edge in student_kg.graph.edges():
-                edge_data = student_kg.graph.edges[edge]
-                edges.append({
-                    'source': edge[0],
-                    'target': edge[1],
-                    'strength': edge_data.get('weight', 0.5)
-                })
-
-        return jsonify({
-            'nodes': nodes,
-            'edges': edges,
-            'student_name': profile['name'],
-            'focus_area': profile['current_focus']
-        })
-
-    except Exception as e:
-        return jsonify({'error': f'Failed to get visualization data: {str(e)}'}), 500
-
-
-
+# ============================================================================
+# END OF ACTIVE ROUTES - All deprecated routes removed
+# ============================================================================
 
 
 if __name__ == '__main__':
+    import socket
+
+    # Find available port with fallback
+    port = 8080
+    max_attempts = 10
+    for attempt in range(max_attempts):
+        try:
+            sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            sock.bind(('127.0.0.1', port))
+            sock.close()
+            break
+        except OSError:
+            port += 1
+
     print("🌟 Starting BIT Tutor Educational Platform...")
-    print("🔗 Access at: http://127.0.0.1:8080")
-    app.run(debug=True, host='127.0.0.1', port=8080)
+    print(f"🔗 Access at: http://127.0.0.1:{port}")
+    app.run(debug=True, host='127.0.0.1', port=port)

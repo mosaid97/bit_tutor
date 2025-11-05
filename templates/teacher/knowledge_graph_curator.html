@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Knowledge Graph Curator - BIT Tutor</title>
+    
+    <!-- Tailwind CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/nexus.css') }}" rel="stylesheet">
+</head>
+<body class="bg-gradient-to-br from-blue-900 via-purple-900 to-indigo-900 min-h-screen">
+    
+    <!-- Navigation -->
+    <nav class="glass-card mx-4 mt-4 mb-6 p-4">
+        <div class="flex justify-between items-center">
+            <div class="flex items-center space-x-4">
+                <div class="text-3xl">🗺️</div>
+                <div>
+                    <h1 class="text-xl font-bold text-gray-800">Knowledge Graph Curator</h1>
+                    <p class="text-sm text-gray-600">Manage Topics and Concepts</p>
+                </div>
+            </div>
+            <div class="flex items-center space-x-4">
+                <a href="{{ url_for('teacher.dashboard') }}" 
+                   class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
+                    <i class="fas fa-arrow-left mr-2"></i>Back to Dashboard
+                </a>
+            </div>
+        </div>
+    </nav>
+    
+    <!-- Main Content -->
+    <div class="container mx-auto px-4 pb-8">
+        
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            
+            <!-- Topics List -->
+            <div class="lg:col-span-1">
+                <div class="glass-card p-6">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-xl font-bold text-gray-800">
+                            <i class="fas fa-book mr-2"></i>Topics
+                        </h2>
+                        <button onclick="showAddTopicModal()" 
+                                class="px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700 text-sm">
+                            <i class="fas fa-plus mr-1"></i>Add
+                        </button>
+                    </div>
+                    
+                    <div id="topics-list" class="space-y-2 max-h-96 overflow-y-auto">
+                        <!-- Topics will be loaded here -->
+                        <div class="text-center py-8 text-gray-500">
+                            <i class="fas fa-spinner fa-spin text-2xl"></i>
+                            <p class="mt-2">Loading topics...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Concepts for Selected Topic -->
+            <div class="lg:col-span-2">
+                <div class="glass-card p-6">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-xl font-bold text-gray-800">
+                            <i class="fas fa-lightbulb mr-2"></i>Concepts
+                            <span id="selected-topic-name" class="text-blue-600"></span>
+                        </h2>
+                        <button onclick="showAddConceptModal()" 
+                                id="add-concept-btn"
+                                class="px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700 text-sm"
+                                disabled>
+                            <i class="fas fa-plus mr-1"></i>Add Concept
+                        </button>
+                    </div>
+                    
+                    <div id="concepts-list" class="space-y-3 max-h-96 overflow-y-auto">
+                        <!-- Concepts will be loaded here -->
+                        <div class="text-center py-8 text-gray-500">
+                            <i class="fas fa-hand-pointer text-2xl"></i>
+                            <p class="mt-2">Select a topic to view concepts</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+        </div>
+        
+    </div>
+    
+    <!-- Add Topic Modal -->
+    <div id="add-topic-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="glass-card max-w-md w-full mx-4 p-6">
+            <h3 class="text-xl font-bold text-gray-800 mb-4">Add New Topic</h3>
+            
+            <form id="add-topic-form">
+                <div class="mb-4">
+                    <label class="block text-gray-700 font-semibold mb-2">Topic Name</label>
+                    <input type="text" 
+                           id="topic-name" 
+                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                           placeholder="Enter topic name"
+                           required>
+                </div>
+                
+                <div class="mb-4">
+                    <label class="block text-gray-700 font-semibold mb-2">Description</label>
+                    <textarea id="topic-description" 
+                              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                              rows="3"
+                              placeholder="Enter topic description"></textarea>
+                </div>
+                
+                <div class="flex justify-end space-x-2">
+                    <button type="button" 
+                            onclick="hideAddTopicModal()"
+                            class="px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400">
+                        Cancel
+                    </button>
+                    <button type="submit" 
+                            class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                        <i class="fas fa-plus mr-2"></i>Add Topic
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Add Concept Modal -->
+    <div id="add-concept-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="glass-card max-w-md w-full mx-4 p-6">
+            <h3 class="text-xl font-bold text-gray-800 mb-4">Add New Concept</h3>
+            
+            <form id="add-concept-form">
+                <div class="mb-4">
+                    <label class="block text-gray-700 font-semibold mb-2">Concept Name</label>
+                    <input type="text" 
+                           id="concept-name" 
+                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                           placeholder="Enter concept name"
+                           required>
+                </div>
+                
+                <div class="mb-4">
+                    <label class="block text-gray-700 font-semibold mb-2">Definition</label>
+                    <textarea id="concept-definition" 
+                              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                              rows="3"
+                              placeholder="Enter concept definition"></textarea>
+                </div>
+                
+                <div class="mb-4">
+                    <label class="block text-gray-700 font-semibold mb-2">Keywords (comma-separated)</label>
+                    <input type="text" 
+                           id="concept-keywords" 
+                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                           placeholder="keyword1, keyword2, keyword3">
+                </div>
+                
+                <div class="flex justify-end space-x-2">
+                    <button type="button" 
+                            onclick="hideAddConceptModal()"
+                            class="px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400">
+                        Cancel
+                    </button>
+                    <button type="submit" 
+                            class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                        <i class="fas fa-plus mr-2"></i>Add Concept
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <script>
+        let selectedTopic = null;
+        
+        // Load topics on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            loadTopics();
+        });
+        
+        // Load all topics
+        async function loadTopics() {
+            try {
+                const response = await fetch('/teacher/api/knowledge-graph/topics');
+                const data = await response.json();
+                
+                const topicsList = document.getElementById('topics-list');
+                
+                if (data.topics && data.topics.length > 0) {
+                    topicsList.innerHTML = data.topics.map(topic => `
+                        <div class="bg-white border border-gray-200 rounded-lg p-3 hover:shadow-md cursor-pointer transition"
+                             onclick="selectTopic('${topic.name}')">
+                            <div class="flex justify-between items-start">
+                                <div class="flex-1">
+                                    <div class="font-semibold text-gray-800">${topic.name}</div>
+                                    <div class="text-sm text-gray-600">${topic.concept_count} concepts</div>
+                                </div>
+                                <div class="flex space-x-2">
+                                    <button onclick="event.stopPropagation(); editTopic('${topic.name}')" 
+                                            class="text-blue-600 hover:text-blue-800">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button onclick="event.stopPropagation(); deleteTopic('${topic.name}')" 
+                                            class="text-red-600 hover:text-red-800">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    `).join('');
+                } else {
+                    topicsList.innerHTML = `
+                        <div class="text-center py-8 text-gray-500">
+                            <i class="fas fa-book text-2xl"></i>
+                            <p class="mt-2">No topics yet. Add your first topic!</p>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('Error loading topics:', error);
+            }
+        }
+        
+        // Select a topic and load its concepts
+        async function selectTopic(topicName) {
+            selectedTopic = topicName;
+            document.getElementById('selected-topic-name').textContent = `: ${topicName}`;
+            document.getElementById('add-concept-btn').disabled = false;
+            
+            try {
+                const response = await fetch(`/teacher/api/knowledge-graph/topics/${encodeURIComponent(topicName)}/concepts`);
+                const data = await response.json();
+                
+                const conceptsList = document.getElementById('concepts-list');
+                
+                if (data.concepts && data.concepts.length > 0) {
+                    conceptsList.innerHTML = data.concepts.map(concept => `
+                        <div class="bg-white border border-gray-200 rounded-lg p-4">
+                            <div class="font-semibold text-gray-800 mb-2">${concept.name}</div>
+                            <div class="text-sm text-gray-600 mb-2">${concept.definition || 'No definition'}</div>
+                            ${concept.keywords && concept.keywords.length > 0 ? `
+                                <div class="flex flex-wrap gap-1">
+                                    ${concept.keywords.map(kw => `
+                                        <span class="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded">${kw}</span>
+                                    `).join('')}
+                                </div>
+                            ` : ''}
+                        </div>
+                    `).join('');
+                } else {
+                    conceptsList.innerHTML = `
+                        <div class="text-center py-8 text-gray-500">
+                            <i class="fas fa-lightbulb text-2xl"></i>
+                            <p class="mt-2">No concepts yet. Add your first concept!</p>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('Error loading concepts:', error);
+            }
+        }
+        
+        // Modal functions
+        function showAddTopicModal() {
+            document.getElementById('add-topic-modal').classList.remove('hidden');
+        }
+        
+        function hideAddTopicModal() {
+            document.getElementById('add-topic-modal').classList.add('hidden');
+            document.getElementById('add-topic-form').reset();
+        }
+        
+        function showAddConceptModal() {
+            if (!selectedTopic) {
+                alert('Please select a topic first');
+                return;
+            }
+            document.getElementById('add-concept-modal').classList.remove('hidden');
+        }
+        
+        function hideAddConceptModal() {
+            document.getElementById('add-concept-modal').classList.add('hidden');
+            document.getElementById('add-concept-form').reset();
+        }
+        
+        // Form submissions
+        document.getElementById('add-topic-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const name = document.getElementById('topic-name').value;
+            const description = document.getElementById('topic-description').value;
+            
+            try {
+                const response = await fetch('/teacher/api/knowledge-graph/topics', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({name, description})
+                });
+                
+                if (response.ok) {
+                    hideAddTopicModal();
+                    loadTopics();
+                    alert('Topic added successfully!');
+                } else {
+                    alert('Error adding topic');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error adding topic');
+            }
+        });
+        
+        document.getElementById('add-concept-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const name = document.getElementById('concept-name').value;
+            const definition = document.getElementById('concept-definition').value;
+            const keywordsStr = document.getElementById('concept-keywords').value;
+            const keywords = keywordsStr.split(',').map(k => k.trim()).filter(k => k);
+            
+            try {
+                const response = await fetch('/teacher/api/knowledge-graph/concepts', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        name,
+                        topic: selectedTopic,
+                        definition,
+                        keywords
+                    })
+                });
+                
+                if (response.ok) {
+                    hideAddConceptModal();
+                    selectTopic(selectedTopic);
+                    alert('Concept added successfully!');
+                } else {
+                    alert('Error adding concept');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error adding concept');
+            }
+        });
+        
+        // Delete topic
+        async function deleteTopic(topicName) {
+            if (!confirm(`Are you sure you want to delete the topic "${topicName}"?`)) {
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/teacher/api/knowledge-graph/topics/${encodeURIComponent(topicName)}`, {
+                    method: 'DELETE'
+                });
+                
+                if (response.ok) {
+                    loadTopics();
+                    if (selectedTopic === topicName) {
+                        selectedTopic = null;
+                        document.getElementById('selected-topic-name').textContent = '';
+                        document.getElementById('concepts-list').innerHTML = `
+                            <div class="text-center py-8 text-gray-500">
+                                <i class="fas fa-hand-pointer text-2xl"></i>
+                                <p class="mt-2">Select a topic to view concepts</p>
+                            </div>
+                        `;
+                    }
+                    alert('Topic deleted successfully!');
+                } else {
+                    alert('Error deleting topic');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error deleting topic');
+            }
+        }
+    </script>
+    
+</body>
+</html>
+

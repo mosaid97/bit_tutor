@@ -1,0 +1,138 @@
+version: '3.8'
+
+services:
+  # ============================================================================
+  # Neo4j Database - Knowledge Graph Backend
+  # ============================================================================
+  neo4j:
+    image: neo4j:5.15.0
+    container_name: ktcd_neo4j
+    ports:
+      - "7474:7474"  # HTTP
+      - "7687:7687"  # Bolt
+    environment:
+      - NEO4J_AUTH=neo4j/ktcd_password123
+      - NEO4J_PLUGINS=["apoc", "graph-data-science"]
+      - NEO4J_dbms_security_procedures_unrestricted=apoc.*,gds.*
+      - NEO4J_dbms_security_procedures_allowlist=apoc.*,gds.*
+      - NEO4J_dbms_memory_heap_initial__size=512m
+      - NEO4J_dbms_memory_heap_max__size=2G
+      - NEO4J_dbms_memory_pagecache_size=512m
+    volumes:
+      - neo4j_data:/data
+      - neo4j_logs:/logs
+      - neo4j_import:/var/lib/neo4j/import
+      - neo4j_plugins:/plugins
+    networks:
+      - ktcd_network
+    healthcheck:
+      test: ["CMD-SHELL", "cypher-shell -u neo4j -p ktcd_password123 'RETURN 1' || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    restart: unless-stopped
+
+  # ============================================================================
+  # AI Models Service - Knowledge Tracing, Cognitive Diagnosis, Recommendation
+  # ============================================================================
+  ai-models:
+    build:
+      context: .
+      dockerfile: Dockerfile.ai-models
+    container_name: ktcd_ai_models
+    ports:
+      - "5000:5000"
+    environment:
+      - AI_MODELS_PORT=5000
+      - NEO4J_URI=bolt://neo4j:7687
+      - NEO4J_USER=neo4j
+      - NEO4J_PASSWORD=ktcd_password123
+      - PYTHONUNBUFFERED=1
+    volumes:
+      - ./models:/app/models
+      - ./logs:/app/logs
+    networks:
+      - ktcd_network
+    depends_on:
+      neo4j:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 4G
+        reservations:
+          cpus: '1'
+          memory: 2G
+
+  # ============================================================================
+  # Main Application - Flask Web Server
+  # ============================================================================
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ktcd_web
+    ports:
+      - "8080:8080"
+    environment:
+      - FLASK_APP=nexus_app.py
+      - FLASK_ENV=production
+      - NEO4J_URI=bolt://neo4j:7687
+      - NEO4J_USER=neo4j
+      - NEO4J_PASSWORD=ktcd_password123
+      - AI_MODELS_URL=http://ai-models:5000
+      - PYTHONUNBUFFERED=1
+    env_file:
+      - .env
+    volumes:
+      - ./logs:/app/logs
+      - ./data:/app/data
+      - ./static:/app/static
+      - ./templates:/app/templates
+    networks:
+      - ktcd_network
+    depends_on:
+      neo4j:
+        condition: service_healthy
+      ai-models:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 2G
+        reservations:
+          cpus: '1'
+          memory: 1G
+
+volumes:
+  neo4j_data:
+    driver: local
+  neo4j_logs:
+    driver: local
+  neo4j_import:
+    driver: local
+  neo4j_plugins:
+    driver: local
+
+networks:
+  ktcd_network:
+    driver: bridge
+    name: ktcd_network
+

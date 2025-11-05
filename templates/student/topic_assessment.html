@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pre-Topic Assessment - {{ topic_name }}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(30, 64, 175, 0.2);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+        .question-card {
+            transition: all 0.3s ease;
+        }
+        .question-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-red-50 via-pink-50 to-purple-50 min-h-screen">
+    <!-- Header -->
+    <nav class="bg-white shadow-lg sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center">
+                    <i class="fas fa-clipboard-check text-red-600 text-2xl mr-3"></i>
+                    <span class="text-xl font-bold text-gray-800">Pre-Topic Assessment</span>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <span class="text-sm text-gray-600" id="timer">Time: 00:00</span>
+                    <a href="/student/{{ student_id }}/learn/topics/{{ topic_name }}"
+                       class="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition">
+                        <i class="fas fa-arrow-left mr-2"></i>Back to Topic
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Assessment Info -->
+        <div class="glass-card rounded-2xl p-8 mb-8 bg-gradient-to-r from-red-50 to-pink-50 border-2 border-red-200">
+            <h1 class="text-3xl font-bold text-gray-900 mb-4">
+                {{ topic_name }}
+            </h1>
+            <p class="text-gray-700 mb-6">
+                📊 This assessment helps us understand your current knowledge level and personalize your learning experience.
+                Answer to the best of your ability - it's okay if you don't know everything yet!
+            </p>
+            <div class="grid grid-cols-3 gap-4">
+                <div class="bg-white rounded-lg p-4 text-center">
+                    <i class="fas fa-question-circle text-3xl text-blue-600 mb-2"></i>
+                    <p class="text-sm text-gray-600">Questions</p>
+                    <p class="text-2xl font-bold text-gray-900" id="total-questions">--</p>
+                </div>
+                <div class="bg-white rounded-lg p-4 text-center">
+                    <i class="fas fa-clock text-3xl text-green-600 mb-2"></i>
+                    <p class="text-sm text-gray-600">Time Limit</p>
+                    <p class="text-2xl font-bold text-gray-900" id="time-limit">15 min</p>
+                </div>
+                <div class="bg-white rounded-lg p-4 text-center">
+                    <i class="fas fa-brain text-3xl text-purple-600 mb-2"></i>
+                    <p class="text-sm text-gray-600">Difficulty</p>
+                    <p class="text-2xl font-bold text-gray-900">Adaptive</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Loading State -->
+        <div id="loading-state" class="glass-card rounded-2xl p-12 text-center">
+            <i class="fas fa-spinner fa-spin text-6xl text-blue-600 mb-4"></i>
+            <p class="text-xl text-gray-700">Generating personalized assessment...</p>
+        </div>
+
+        <!-- Questions Container -->
+        <div id="questions-container" class="hidden space-y-6">
+            <!-- Questions will be dynamically inserted here -->
+        </div>
+
+        <!-- Submit Button -->
+        <div id="submit-container" class="hidden mt-8">
+            <button onclick="submitAssessment()"
+                    class="w-full px-8 py-4 bg-gradient-to-r from-red-600 to-pink-600 text-white rounded-xl hover:shadow-2xl transition transform hover:scale-105 font-bold text-lg">
+                <i class="fas fa-check-circle mr-2"></i>Submit Assessment
+            </button>
+        </div>
+
+        <!-- Results Container -->
+        <div id="results-container" class="hidden">
+            <div class="glass-card rounded-2xl p-8 bg-gradient-to-r from-green-50 to-blue-50 border-2 border-green-200">
+                <h2 class="text-2xl font-bold text-gray-900 mb-4">
+                    <i class="fas fa-chart-line mr-2 text-green-600"></i>Assessment Complete!
+                </h2>
+                <div class="grid grid-cols-2 gap-6 mb-6">
+                    <div class="bg-white rounded-lg p-6 text-center">
+                        <p class="text-sm text-gray-600 mb-2">Your Score</p>
+                        <p class="text-5xl font-bold text-green-600" id="final-score">--</p>
+                    </div>
+                    <div class="bg-white rounded-lg p-6 text-center">
+                        <p class="text-sm text-gray-600 mb-2">Correct Answers</p>
+                        <p class="text-5xl font-bold text-blue-600" id="correct-count">--</p>
+                    </div>
+                </div>
+                <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-6">
+                    <p class="text-sm text-yellow-700">
+                        <i class="fas fa-lightbulb mr-2"></i>
+                        <strong>What's Next:</strong> Based on your results, we've personalized your learning path to focus on areas where you can improve the most.
+                    </p>
+                </div>
+                <a href="/student/{{ student_id }}/learn/topics/{{ topic_name }}"
+                   class="block w-full px-8 py-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl hover:shadow-2xl transition transform hover:scale-105 font-bold text-lg text-center">
+                    <i class="fas fa-play mr-2"></i>Start Learning
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const studentId = '{{ student_id }}';
+        const topicName = '{{ topic_name }}';
+        let assessmentData = null;
+        let answers = {};
+        let startTime = null;
+        let timerInterval = null;
+
+        // Load assessment on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            loadAssessment();
+            startTimer();
+        });
+
+        // Start timer
+        function startTimer() {
+            startTime = new Date();
+            timerInterval = setInterval(function() {
+                const elapsed = Math.floor((new Date() - startTime) / 1000);
+                const minutes = Math.floor(elapsed / 60);
+                const seconds = elapsed % 60;
+                document.getElementById('timer').textContent = 
+                    `Time: ${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+            }, 1000);
+        }
+
+        // Load assessment
+        async function loadAssessment() {
+            try {
+                const response = await fetch(`/student/${studentId}/learn/api/topics/${encodeURIComponent(topicName)}/assessment/generate`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to generate assessment');
+                }
+
+                assessmentData = await response.json();
+                displayQuestions();
+            } catch (error) {
+                console.error('Error loading assessment:', error);
+                document.getElementById('loading-state').innerHTML = `
+                    <i class="fas fa-exclamation-triangle text-6xl text-red-600 mb-4"></i>
+                    <p class="text-xl text-gray-700">Failed to load assessment. Please try again.</p>
+                    <button onclick="location.reload()" class="mt-4 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                        Retry
+                    </button>
+                `;
+            }
+        }
+
+        // Display questions
+        function displayQuestions() {
+            if (!assessmentData || !assessmentData.questions) {
+                return;
+            }
+
+            document.getElementById('total-questions').textContent = assessmentData.total_questions;
+            document.getElementById('loading-state').classList.add('hidden');
+            document.getElementById('questions-container').classList.remove('hidden');
+            document.getElementById('submit-container').classList.remove('hidden');
+
+            const container = document.getElementById('questions-container');
+            container.innerHTML = '';
+
+            assessmentData.questions.forEach((question, index) => {
+                const questionCard = document.createElement('div');
+                questionCard.className = 'question-card glass-card rounded-xl p-6';
+                questionCard.innerHTML = `
+                    <div class="flex items-start mb-4">
+                        <span class="flex-shrink-0 w-10 h-10 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold mr-4">
+                            ${index + 1}
+                        </span>
+                        <div class="flex-1">
+                            <p class="text-lg font-semibold text-gray-900 mb-4">${question.question}</p>
+                            <div class="space-y-3">
+                                ${question.options.map((option, optIndex) => `
+                                    <label class="flex items-center p-3 bg-gray-50 rounded-lg hover:bg-blue-50 cursor-pointer transition">
+                                        <input type="radio" 
+                                               name="question_${index}" 
+                                               value="${optIndex}"
+                                               onchange="recordAnswer(${index}, ${optIndex}, '${option}')"
+                                               class="w-5 h-5 text-blue-600 mr-3">
+                                        <span class="text-gray-800">${option}</span>
+                                    </label>
+                                `).join('')}
+                            </div>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(questionCard);
+            });
+        }
+
+        // Record answer
+        function recordAnswer(questionIndex, optionIndex, optionText) {
+            const question = assessmentData.questions[questionIndex];
+            answers[questionIndex] = {
+                question_id: question.question_id || `q_${questionIndex}`,
+                question: question.question,
+                selected_answer: optionText,
+                selected_index: optionIndex,
+                correct_answer: question.correct_answer,
+                is_correct: optionText === question.correct_answer
+            };
+        }
+
+        // Submit assessment
+        async function submitAssessment() {
+            // Check if all questions are answered
+            if (Object.keys(answers).length < assessmentData.total_questions) {
+                alert('Please answer all questions before submitting.');
+                return;
+            }
+
+            // Stop timer
+            clearInterval(timerInterval);
+
+            // Calculate score
+            const correctCount = Object.values(answers).filter(a => a.is_correct).length;
+            const score = Math.round((correctCount / assessmentData.total_questions) * 100);
+
+            try {
+                // Submit to backend
+                const response = await fetch(`/student/${studentId}/learn/api/topics/${encodeURIComponent(topicName)}/assessment/submit`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        assessment_id: assessmentData.assessment_id,
+                        answers: Object.values(answers),
+                        score: score,
+                        time_taken: Math.floor((new Date() - startTime) / 1000)
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to submit assessment');
+                }
+
+                // Show results
+                document.getElementById('questions-container').classList.add('hidden');
+                document.getElementById('submit-container').classList.add('hidden');
+                document.getElementById('results-container').classList.remove('hidden');
+                document.getElementById('final-score').textContent = score + '%';
+                document.getElementById('correct-count').textContent = `${correctCount}/${assessmentData.total_questions}`;
+
+            } catch (error) {
+                console.error('Error submitting assessment:', error);
+                alert('Failed to submit assessment. Please try again.');
+            }
+        }
+    </script>
+</body>
+</html>
+

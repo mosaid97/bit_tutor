@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Class Pre-Assessment - {{ class_name }}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-50 min-h-screen">
+    <!-- Header -->
+    <nav class="glass-card mx-4 mt-4 mb-6 p-4">
+        <div class="flex justify-between items-center">
+            <div class="flex items-center space-x-4">
+                <div class="text-3xl">📋</div>
+                <div>
+                    <h1 class="text-xl font-bold text-gray-800">Class Pre-Assessment</h1>
+                    <p class="text-sm text-gray-600">{{ class_name }}</p>
+                </div>
+            </div>
+            <div class="flex items-center space-x-4">
+                <div class="text-sm text-gray-600">
+                    <i class="fas fa-clock mr-2"></i>
+                    <span id="timer">--:--</span>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container mx-auto px-4 pb-8 max-w-4xl">
+        
+        <!-- Instructions Panel -->
+        <div id="instructions-panel" class="glass-card p-6 mb-8 rounded-xl shadow-lg">
+            <h2 class="text-2xl font-bold text-gray-800 mb-4">
+                <i class="fas fa-info-circle mr-2"></i>Welcome to Your Class Pre-Assessment
+            </h2>
+            
+            <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+                <div class="flex items-start">
+                    <i class="fas fa-lightbulb text-blue-600 text-2xl mr-3 mt-1"></i>
+                    <div>
+                        <h3 class="font-bold text-blue-900 mb-1">Why Take This Assessment?</h3>
+                        <p class="text-blue-700">This assessment helps us understand your current knowledge level across all topics in this class. Your results will be used to personalize your learning experience and recommend the best starting points for you.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="space-y-3 text-gray-700 mb-6">
+                <p><i class="fas fa-check text-green-600 mr-2"></i>This assessment covers all major concepts in the class</p>
+                <p><i class="fas fa-check text-green-600 mr-2"></i>It will take approximately 20-30 minutes</p>
+                <p><i class="fas fa-check text-green-600 mr-2"></i>Your score will NOT affect your grade</p>
+                <p><i class="fas fa-check text-green-600 mr-2"></i>Results will help create your personalized learning path</p>
+                <p><i class="fas fa-check text-green-600 mr-2"></i>You can only take this assessment once</p>
+            </div>
+            
+            <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
+                <p class="text-yellow-800">
+                    <i class="fas fa-exclamation-triangle mr-2"></i>
+                    <strong>Important:</strong> You must complete this assessment before accessing any class topics or materials.
+                </p>
+            </div>
+            
+            <button onclick="startAssessment()" 
+                    class="w-full px-6 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 transition font-semibold text-lg">
+                <i class="fas fa-play-circle mr-2"></i>Start Assessment
+            </button>
+        </div>
+
+        <!-- Assessment Panel (Hidden Initially) -->
+        <div id="assessment-panel" class="hidden">
+            
+            <!-- Progress Bar -->
+            <div class="glass-card p-4 mb-6 rounded-xl shadow-lg">
+                <div class="flex justify-between text-sm text-gray-600 mb-2">
+                    <span>Question <span id="current-question">1</span> of <span id="total-questions">--</span></span>
+                    <span id="progress-percentage">0%</span>
+                </div>
+                <div class="w-full bg-gray-200 rounded-full h-2">
+                    <div id="progress-bar" class="bg-gradient-to-r from-blue-600 to-purple-600 h-2 rounded-full transition-all duration-300" style="width: 0%"></div>
+                </div>
+            </div>
+            
+            <!-- Question Card -->
+            <div class="glass-card p-6 mb-6 rounded-xl shadow-lg">
+                <div class="mb-6">
+                    <div class="text-sm text-white mb-2">Question <span id="question-number">1</span></div>
+                    <h3 id="question-text" class="text-xl font-semibold text-white">
+                        <!-- Question text will be inserted here -->
+                    </h3>
+                </div>
+                
+                <!-- Answer Options -->
+                <div id="answer-options" class="space-y-3">
+                    <!-- Options will be inserted here -->
+                </div>
+            </div>
+            
+            <!-- Navigation Buttons -->
+            <div class="flex justify-between">
+                <button id="prev-btn" 
+                        onclick="previousQuestion()" 
+                        class="px-6 py-3 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition"
+                        disabled>
+                    <i class="fas fa-arrow-left mr-2"></i>Previous
+                </button>
+                
+                <button id="next-btn" 
+                        onclick="nextQuestion()" 
+                        class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
+                    Next<i class="fas fa-arrow-right ml-2"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Results Panel (Hidden Initially) -->
+        <div id="results-panel" class="hidden">
+            <div class="glass-card p-8 rounded-xl shadow-lg">
+                <div class="text-center mb-8">
+                    <div id="result-icon" class="text-6xl mb-4">🎉</div>
+                    <h2 class="text-3xl font-bold text-gray-800 mb-2">Assessment Complete!</h2>
+                    <p id="result-message" class="text-gray-600 mb-6">Analyzing your results...</p>
+                </div>
+                
+                <div id="score-display" class="hidden">
+                    <!-- Score breakdown -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                        <div class="text-center">
+                            <div class="text-5xl font-bold mb-2" id="final-score">--</div>
+                            <div class="text-gray-600">Overall Score</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-5xl font-bold text-blue-600 mb-2" id="correct-count">--</div>
+                            <div class="text-gray-600">Correct Answers</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Cognitive Profile -->
+                    <div class="bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg p-6 mb-6">
+                        <h3 class="text-xl font-bold text-gray-800 mb-4">
+                            <i class="fas fa-brain mr-2 text-purple-600"></i>Your Cognitive Profile
+                        </h3>
+                        <div id="cognitive-profile" class="space-y-3">
+                            <!-- Will be populated with mastery levels -->
+                        </div>
+                    </div>
+                    
+                    <!-- Recommended Starting Points -->
+                    <div class="bg-gradient-to-r from-green-50 to-blue-50 rounded-lg p-6 mb-6">
+                        <h3 class="text-xl font-bold text-gray-800 mb-4">
+                            <i class="fas fa-route mr-2 text-green-600"></i>Recommended Starting Points
+                        </h3>
+                        <div id="recommendations" class="space-y-3">
+                            <!-- Will be populated with recommendations -->
+                        </div>
+                    </div>
+                    
+                    <button onclick="proceedToClass()" 
+                            class="w-full px-6 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 transition font-semibold text-lg">
+                        <i class="fas fa-arrow-right mr-2"></i>Proceed to Class
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let assessmentData = null;
+        let currentQuestionIndex = 0;
+        let userAnswers = [];
+        let startTime = null;
+        let timerInterval = null;
+
+        // Start timer
+        function startTimer() {
+            startTime = Date.now();
+            timerInterval = setInterval(() => {
+                const elapsed = Math.floor((Date.now() - startTime) / 1000);
+                const minutes = Math.floor(elapsed / 60);
+                const seconds = elapsed % 60;
+                document.getElementById('timer').textContent = 
+                    `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            }, 1000);
+        }
+
+        // Start assessment
+        async function startAssessment() {
+            document.getElementById('instructions-panel').classList.add('hidden');
+            document.getElementById('assessment-panel').classList.remove('hidden');
+            
+            try {
+                const response = await fetch('/student/{{ student_id }}/learn/api/class-assessment/generate', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        class_id: '{{ class_id }}'
+                    })
+                });
+                
+                assessmentData = await response.json();
+                document.getElementById('total-questions').textContent = assessmentData.questions.length;
+                
+                startTimer();
+                displayQuestion(0);
+                
+            } catch (error) {
+                console.error('Error generating assessment:', error);
+                alert('Error generating assessment. Please try again.');
+            }
+        }
+
+        // Display question
+        function displayQuestion(index) {
+            const question = assessmentData.questions[index];
+            currentQuestionIndex = index;
+            
+            document.getElementById('question-number').textContent = index + 1;
+            document.getElementById('current-question').textContent = index + 1;
+            document.getElementById('question-text').textContent = question.question;
+            
+            const progress = ((index + 1) / assessmentData.questions.length) * 100;
+            document.getElementById('progress-bar').style.width = progress + '%';
+            document.getElementById('progress-percentage').textContent = Math.round(progress) + '%';
+            
+            const optionsContainer = document.getElementById('answer-options');
+            optionsContainer.innerHTML = '';
+            
+            question.options.forEach((option, optionIndex) => {
+                const isSelected = userAnswers[index] === optionIndex;
+                const optionDiv = document.createElement('div');
+                optionDiv.className = `p-4 rounded-lg border-2 cursor-pointer transition ${
+                    isSelected ? 'border-blue-600 bg-blue-50' : 'border-gray-300 hover:border-blue-400'
+                }`;
+                optionDiv.onclick = () => selectAnswer(optionIndex);
+                optionDiv.innerHTML = `
+                    <div class="flex items-center">
+                        <div class="w-6 h-6 rounded-full border-2 ${
+                            isSelected ? 'border-blue-600 bg-blue-600' : 'border-gray-400'
+                        } flex items-center justify-center mr-3">
+                            ${isSelected ? '<i class="fas fa-check text-white text-xs"></i>' : ''}
+                        </div>
+                        <span class="text-white">${option}</span>
+                    </div>
+                `;
+                optionsContainer.appendChild(optionDiv);
+            });
+            
+            document.getElementById('prev-btn').disabled = index === 0;
+            document.getElementById('next-btn').textContent = 
+                index === assessmentData.questions.length - 1 ? 'Submit' : 'Next';
+        }
+
+        function selectAnswer(optionIndex) {
+            userAnswers[currentQuestionIndex] = optionIndex;
+            displayQuestion(currentQuestionIndex);
+        }
+
+        function previousQuestion() {
+            if (currentQuestionIndex > 0) {
+                displayQuestion(currentQuestionIndex - 1);
+            }
+        }
+
+        async function nextQuestion() {
+            if (currentQuestionIndex < assessmentData.questions.length - 1) {
+                displayQuestion(currentQuestionIndex + 1);
+            } else {
+                await submitAssessment();
+            }
+        }
+
+        async function submitAssessment() {
+            clearInterval(timerInterval);
+            const timeSpent = Math.floor((Date.now() - startTime) / 1000);
+            
+            document.getElementById('assessment-panel').classList.add('hidden');
+            document.getElementById('results-panel').classList.remove('hidden');
+            
+            try {
+                const responses = assessmentData.questions.map((q, i) => ({
+                    question_id: q.question_id,
+                    concept_id: q.concept_id,
+                    selected_answer: userAnswers[i],
+                    correct_answer: q.correct_answer,
+                    correct: userAnswers[i] === q.correct_answer
+                }));
+                
+                const response = await fetch('/student/{{ student_id }}/learn/api/class-assessment/submit', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        class_id: '{{ class_id }}',
+                        assessment_id: assessmentData.assessment_id,
+                        responses: responses,
+                        time_spent: timeSpent
+                    })
+                });
+                
+                const result = await response.json();
+                displayResults(result);
+                
+            } catch (error) {
+                console.error('Error submitting assessment:', error);
+                alert('Error submitting assessment. Please try again.');
+            }
+        }
+
+        function displayResults(result) {
+            document.getElementById('final-score').textContent = result.score.toFixed(1) + '%';
+            document.getElementById('correct-count').textContent = result.correct_count + '/' + result.total_questions;
+            
+            // Display cognitive profile
+            const profileDiv = document.getElementById('cognitive-profile');
+            result.mastery_profile.forEach(item => {
+                const level = item.mastery_level;
+                const color = level >= 0.7 ? 'green' : level >= 0.4 ? 'yellow' : 'red';
+                profileDiv.innerHTML += `
+                    <div class="flex items-center justify-between p-3 bg-white rounded-lg">
+                        <span class="font-semibold text-gray-800">${item.concept_name}</span>
+                        <div class="flex items-center">
+                            <div class="w-32 h-2 bg-gray-200 rounded-full mr-3">
+                                <div class="h-2 bg-${color}-500 rounded-full" style="width: ${level * 100}%"></div>
+                            </div>
+                            <span class="text-sm text-gray-600">${(level * 100).toFixed(0)}%</span>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            // Display recommendations
+            const recsDiv = document.getElementById('recommendations');
+            result.recommendations.forEach(rec => {
+                recsDiv.innerHTML += `
+                    <div class="p-3 bg-white rounded-lg">
+                        <div class="font-semibold text-gray-800">${rec.topic}</div>
+                        <div class="text-sm text-gray-600">${rec.reason}</div>
+                    </div>
+                `;
+            });
+            
+            document.getElementById('score-display').classList.remove('hidden');
+        }
+
+        function proceedToClass() {
+            window.location.href = '/student/{{ student_id }}/learn/topics';
+        }
+    </script>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</body>
+</html>
+

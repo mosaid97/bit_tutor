@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ student.name }} - BIT Tutor Dashboard</title>
+    
+    <!-- Modern CSS Framework -->
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Chart.js for Advanced Visualizations -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <style>
+        * { font-family: 'Inter', sans-serif; }
+        
+        .nexus-gradient {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+        }
+        
+        .glass-card {
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(30, 64, 175, 0.2);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+        
+        .metric-card {
+            background: linear-gradient(135deg, rgba(255,255,255,0.15), rgba(255,255,255,0.1));
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255,255,255,0.3);
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+        
+        .metric-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+        
+        .pulse-dot {
+            animation: pulse-dot 2s infinite;
+        }
+        
+        @keyframes pulse-dot {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.7; transform: scale(1.1); }
+        }
+        
+        .ai-insight {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border-radius: 15px;
+            padding: 1rem;
+            margin: 0.5rem 0;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .ai-insight::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            animation: shimmer 3s infinite;
+        }
+        
+        @keyframes shimmer {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+        
+        .recommendation-card {
+            background: linear-gradient(135deg, #ff9a9e, #fecfef);
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin: 1rem 0;
+            color: #2d3748;
+            transition: all 0.3s ease;
+        }
+        
+        .recommendation-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.1);
+        }
+
+        .topic-card {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .topic-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+        }
+    </style>
+</head>
+<body class="nexus-gradient min-h-screen">
+    <!-- Navigation -->
+    <nav class="bg-white shadow-lg sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center">
+                    <i class="fas fa-graduation-cap text-purple-600 text-2xl mr-3"></i>
+                    <span class="text-xl font-bold text-gray-800">BIT Tutor - Nexus AI</span>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <a href="{{ url_for('student_portal.cognitive_progress', student_id=student.student_id) }}"
+                       class="px-4 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-lg hover:shadow-lg transition">
+                        <i class="fas fa-brain mr-2"></i>
+                        My Progress
+                    </a>
+                    <span class="text-gray-700">
+                        <i class="fas fa-user-circle mr-2"></i>
+                        {{ student.name }}
+                    </span>
+                    <a href="{{ url_for('student_portal.logout') }}"
+                       class="text-red-600 hover:text-red-700">
+                        <i class="fas fa-sign-out-alt mr-1"></i>
+                        Logout
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Welcome Section -->
+        <div class="glass-card rounded-xl p-6 mb-8">
+            <h1 class="text-3xl font-bold text-gray-800 mb-2">
+                Welcome back, {{ student.name }}! 👋
+            </h1>
+            <p class="text-gray-600">
+                <i class="fas fa-book-open mr-2"></i>
+                {{ student.class_name or 'Your Learning Journey' }}
+            </p>
+        </div>
+
+        <!-- Main Grid Layout -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Left Column - Charts -->
+            <div class="lg:col-span-2 space-y-6">
+                <!-- Performance Trend Chart -->
+                <div class="glass-card rounded-2xl p-6">
+                    <h3 class="text-xl font-bold text-gray-800 mb-4">
+                        <i class="fas fa-chart-line mr-2 text-blue-500"></i>Performance Trend
+                    </h3>
+                    <canvas id="performanceChart" height="100"></canvas>
+                </div>
+
+                <!-- Skill Mastery Radar -->
+                <div class="glass-card rounded-2xl p-6">
+                    <h3 class="text-xl font-bold text-gray-800 mb-4">
+                        <i class="fas fa-spider mr-2 text-green-500"></i>Skill Mastery Matrix
+                    </h3>
+                    <canvas id="skillRadarChart" height="120"></canvas>
+                </div>
+
+                <!-- Learning Velocity -->
+                <div class="glass-card rounded-2xl p-6">
+                    <h3 class="text-xl font-bold text-gray-800 mb-4">
+                        <i class="fas fa-tachometer-alt mr-2 text-purple-500"></i>Learning Velocity
+                    </h3>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div class="text-center">
+                            <div class="text-2xl font-bold text-blue-600" id="concepts-per-week">--</div>
+                            <div class="text-sm text-gray-600">Concepts/Week</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-2xl font-bold text-green-600" id="practice-hours">--</div>
+                            <div class="text-sm text-gray-600">Practice Hours</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-2xl font-bold text-orange-600" id="completion-rate">--</div>
+                            <div class="text-sm text-gray-600">Completion Rate</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-2xl font-bold text-purple-600" id="retention-score">--</div>
+                            <div class="text-sm text-gray-600">Retention Score</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column - AI Insights & Recommendations -->
+            <div class="space-y-6">
+                <!-- AI Insights -->
+                <div class="glass-card rounded-2xl p-6">
+                    <h3 class="text-xl font-bold text-gray-800 mb-4">
+                        <i class="fas fa-brain mr-2 text-pink-500"></i>AI Insights
+                    </h3>
+                    <div id="ai-insights-container">
+                        <div class="ai-insight text-sm">Loading insights...</div>
+                    </div>
+                </div>
+
+                <!-- Recommendations -->
+                <div class="glass-card rounded-2xl p-6">
+                    <h3 class="text-xl font-bold text-gray-800 mb-4">
+                        <i class="fas fa-lightbulb mr-2 text-yellow-500"></i>Recommended Next
+                    </h3>
+                    <div id="recommendations-container">
+                        <div class="text-sm text-gray-600">Loading recommendations...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Topics Section -->
+        <div class="mt-8">
+            <h2 class="text-2xl font-bold text-white mb-6">
+                <i class="fas fa-book mr-2"></i>Your Learning Topics
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {% for topic in topics %}
+                <div class="topic-card glass-card rounded-xl p-6"
+                     onclick="window.location.href='{{ url_for('student_learning.topic_detail', student_id=student.student_id, topic_name=topic.name) }}'">
+                    <h3 class="text-lg font-bold text-gray-800 mb-2">{{ topic.name }}</h3>
+                    <p class="text-sm text-gray-600 mb-4">{{ topic.description }}</p>
+                    <div class="flex justify-between items-center text-xs text-gray-500 mb-4">
+                        <span><i class="fas fa-lightbulb mr-1"></i>{{ topic.concept_count }} concepts</span>
+                        <span><i class="fas fa-clock mr-1"></i>{{ topic.estimated_hours }}h</span>
+                    </div>
+                    <button class="w-full px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:shadow-lg transition">
+                        <i class="fas fa-play mr-2"></i>Start Learning
+                    </button>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const studentId = '{{ student.student_id }}';
+        let charts = {};
+
+        // Load student analytics
+        async function loadStudentAnalytics() {
+            try {
+                const response = await fetch(`/student/api/${studentId}/analytics`);
+                const data = await response.json();
+                
+                updateAnalytics(data);
+            } catch (error) {
+                console.error('Error loading analytics:', error);
+            }
+        }
+
+        // Update analytics display
+        function updateAnalytics(data) {
+            // Update learning velocity
+            document.getElementById('concepts-per-week').textContent = data.learning_velocity.concepts_per_week.toFixed(1);
+            document.getElementById('practice-hours').textContent = data.learning_velocity.practice_hours.toFixed(1);
+            document.getElementById('completion-rate').textContent = data.learning_velocity.completion_rate.toFixed(1) + '%';
+            document.getElementById('retention-score').textContent = data.learning_velocity.retention_score.toFixed(1) + '%';
+
+            // Update AI insights
+            const insightsContainer = document.getElementById('ai-insights-container');
+            insightsContainer.innerHTML = data.ai_insights.map(insight => 
+                `<div class="ai-insight text-sm mb-2">${insight}</div>`
+            ).join('');
+
+            // Update recommendations
+            const recommendationsContainer = document.getElementById('recommendations-container');
+            recommendationsContainer.innerHTML = data.next_recommendations.map(rec => `
+                <div class="recommendation-card">
+                    <div class="font-semibold mb-2">${rec.title}</div>
+                    <div class="text-sm mb-2">${rec.description}</div>
+                    ${rec.questions_count ? `<div class="text-xs text-purple-600 mb-2">📝 ${rec.questions_count} questions</div>` : ''}
+                    <div class="flex justify-between items-center text-xs">
+                        <span class="bg-white bg-opacity-30 px-2 py-1 rounded">${rec.difficulty}</span>
+                        <span class="font-semibold">+${rec.xp_reward} XP</span>
+                    </div>
+                </div>
+            `).join('');
+
+            // Update charts
+            updateCharts(data);
+        }
+
+        // Update charts
+        function updateCharts(data) {
+            // Performance Trend Chart
+            const perfCtx = document.getElementById('performanceChart').getContext('2d');
+            if (charts.performance) charts.performance.destroy();
+            
+            charts.performance = new Chart(perfCtx, {
+                type: 'line',
+                data: {
+                    labels: data.performance_trend.dates,
+                    datasets: [{
+                        label: 'Performance Score',
+                        data: data.performance_trend.scores,
+                        borderColor: 'rgb(59, 130, 246)',
+                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                        borderWidth: 3,
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: { beginAtZero: true, max: 100 }
+                    }
+                }
+            });
+
+            // Skill Radar Chart
+            const skillCtx = document.getElementById('skillRadarChart').getContext('2d');
+            if (charts.skill) charts.skill.destroy();
+            
+            charts.skill = new Chart(skillCtx, {
+                type: 'radar',
+                data: {
+                    labels: Object.keys(data.skill_mastery),
+                    datasets: [{
+                        label: 'Skill Level',
+                        data: Object.values(data.skill_mastery),
+                        borderColor: 'rgb(34, 197, 94)',
+                        backgroundColor: 'rgba(34, 197, 94, 0.2)',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        r: { beginAtZero: true, max: 100 }
+                    }
+                }
+            });
+        }
+
+        // Load analytics on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            loadStudentAnalytics();
+        });
+    </script>
+</body>
+</html>
+
